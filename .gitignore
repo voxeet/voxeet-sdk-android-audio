@@ -1,4 +1,9 @@
+# Android Studio
+*.iml
+.idea
+
 # Built application files
+
 *.apk
 *.ap_
 

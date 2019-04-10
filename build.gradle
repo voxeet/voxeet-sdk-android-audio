@@ -1,0 +1,46 @@
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.3.0'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
+
+        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.6'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenLocal()
+        jcenter()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+//we can install every module right away
+task installAll {
+    dependsOn(':audio:clean')
+    dependsOn(':audio:assembleRelease')
+    dependsOn(':audio:install')
+}
+
+subprojects {
+    task allDeps(type: DependencyReportTask) {}
+}
+
+ext {
+    buildToolsVersion = "28.0.3"
+    minSdkVersion = 14
+    compileSdkVersion = 28
+    targetSdkVersion = 27
+    supportLibVersion = "28.0.0"
+
+    audioSdkVersion = "1.0.0"
+}
