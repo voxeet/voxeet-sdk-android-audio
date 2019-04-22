@@ -5,21 +5,15 @@ package com.voxeet.audio;
  */
 
 public enum AudioRoute {
-    ROUTE_HEADSET(0, false),
-    ROUTE_PHONE(1, true),
-    ROUTE_SPEAKER(2, false),
-    ROUTE_BLUETOOTH(3, false);
+    ROUTE_HEADSET(false),
+    ROUTE_PHONE(true),
+    ROUTE_SPEAKER(false),
+    ROUTE_BLUETOOTH(false);
 
-    private int mValue;
     private boolean mProximitySensor;
 
-    AudioRoute(int value, boolean proximity_sensor) {
-        mValue = value;
+    AudioRoute(boolean proximity_sensor) {
         mProximitySensor = proximity_sensor;
-    }
-
-    public int value() {
-        return mValue;
     }
 
     public boolean useProximitySensor() {
