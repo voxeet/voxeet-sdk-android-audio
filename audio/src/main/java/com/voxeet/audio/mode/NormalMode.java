@@ -24,4 +24,9 @@ public class NormalMode extends AbstractMode {
         forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
         audioFocusManger.requestAudioFocus(manager);
     }
+
+    @Override
+    public boolean isConnected() {
+        return true;
+    }
 }

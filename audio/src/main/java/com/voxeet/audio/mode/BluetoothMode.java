@@ -27,4 +27,9 @@ public class BluetoothMode extends AbstractMode {
         forceVolumeControlStream(Constants.STREAM_BLUETOOTH_SCO);
         audioFocusManger.requestAudioFocus(manager);
     }
+
+    @Override
+    public boolean isConnected() {
+        return true; //TODO check for current bluetooth state?
+    }
 }

@@ -32,6 +32,11 @@ public class SpeakerMode extends AbstractMode {
         audioFocusManger.requestAudioFocus(manager);
     }
 
+    @Override
+    public boolean isConnected() {
+        return true;
+    }
+
     private void applyNonSamsung(boolean speaker_state) {
         manager.setMode(MODE_IN_COMMUNICATION);
         manager.setSpeakerphoneOn(speaker_state);
