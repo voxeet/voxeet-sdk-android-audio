@@ -349,6 +349,16 @@ public class AudioStackManager {
         }
     }
 
+    public AudioStackManager requestAudioFocus() {
+        if(null != currentMode) currentMode.requestAudioFocus();
+        return this;
+    }
+
+    public AudioStackManager abandonAudioFocus() {
+        if(null != currentMode) currentMode.abandonAudioFocus();
+        return this;
+    }
+
     @Nullable
     public Ringtone getSystemRingtone() {
         Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
