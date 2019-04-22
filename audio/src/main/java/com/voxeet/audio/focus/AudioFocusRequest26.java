@@ -44,7 +44,9 @@ public class AudioFocusRequest26 implements AudioFocusRequest {
     public int requestAudioFocus(@NonNull AudioManager manager) {
         manager.setMode(AudioManager.MODE_IN_CALL);
         Log.d("AudioFocusRequest", "requestAudioFocus");
-        manager.requestAudioFocus(null, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN);
+        manager.requestAudioFocus(null,
+                AudioManager.STREAM_VOICE_CALL,
+                AudioManager.AUDIOFOCUS_GAIN);
 
         return manager.requestAudioFocus(focusRequestBuilt);
     }
