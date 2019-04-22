@@ -20,6 +20,7 @@ import com.voxeet.audio.machines.BluetoothHeadsetMachine;
 import com.voxeet.audio.machines.WiredHeadsetMachine;
 import com.voxeet.audio.machines.WiredInformation;
 import com.voxeet.audio.mode.BluetoothMode;
+import com.voxeet.audio.mode.NormalMode;
 import com.voxeet.audio.mode.SpeakerMode;
 import com.voxeet.audio.mode.WiredMode;
 import com.voxeet.audio.utils.Constants;
@@ -32,8 +33,8 @@ import java.util.List;
  * Control and Manager the Audio states of the media
  */
 
-public class AudioManager {
-    private static final String TAG = AudioManager.class.getSimpleName();
+public class AudioStackManager {
+    private static final String TAG = AudioStackManager.class.getSimpleName();
     private WiredHeadsetMachine mWiredMachine;
     private BluetoothHeadsetMachine mBluetoothMachine;
     private Context mContext;
@@ -41,12 +42,11 @@ public class AudioManager {
     private SpeakerMode speakerMode;
     private WiredMode wiredMode;
     private BluetoothMode bluetoothMode;
+    private NormalMode normalMode;
 
     private android.media.AudioManager mServiceAudioManager;
 
     private HeadsetStateReceiver mHeadsetStateReceiver;
-
-    private BluetoothAdapter mBluetoothAdapter;
 
     private AudioRoute mOutputRoute = AudioRoute.ROUTE_PHONE;
     private ListenerHolder<IMediaStateListener> mMediaStateListeners = new ListenerHolder<>();
@@ -62,22 +62,11 @@ public class AudioManager {
         }
     });
 
-    private AudioFocusManager manager;
+    private AudioFocusManager audioFocusManager;
     private boolean enabled;
 
     public void notifyAudioRoute() {
         mAudioRouteListeners.notif();
-    }
-
-    public void requestAudioFocus() {
-        forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
-        manager.requestAudioFocus(mServiceAudioManager);
-    }
-
-    public void abandonAudioFocusRequest() {
-        mServiceAudioManager.setMode(android.media.AudioManager.MODE_NORMAL);
-        manager.abandonAudioFocus(mServiceAudioManager);
-        forceVolumeControlStream(Constants.STREAM_MUSIC);
     }
 
     public void disable() {
@@ -93,7 +82,7 @@ public class AudioManager {
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "onReceive: " + intent.getAction());
             if (!enabled) {
-                Log.d(TAG, "onReceive: the AudioManager is disabled, nothing to do for action received");
+                Log.d(TAG, "onReceive: the AudioStackManager is disabled, nothing to do for action received");
                 return;
             }
 
@@ -122,34 +111,37 @@ public class AudioManager {
 
                     switch (l_state) {
                         case android.media.AudioManager.SCO_AUDIO_STATE_CONNECTED:
+                            bluetoothMode.requestAudioFocus();
+                            break;
                         case android.media.AudioManager.SCO_AUDIO_STATE_DISCONNECTED:
-                            mBluetoothMachine.requestAudioFocus();
+                            bluetoothMode.abandonAudioFocus();
                     }
             }
         }
     }
 
-    private AudioManager() {
-        manager = new AudioFocusManager();
+    private AudioStackManager() {
+        audioFocusManager = new AudioFocusManager();
         mHeadsetStateReceiver = new HeadsetStateReceiver();
     }
 
-    public AudioManager(Context context) {
+    public AudioStackManager(Context context) {
         this();
 
         mContext = context;
 
         mServiceAudioManager = (android.media.AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
-        mBluetoothMachine = new BluetoothHeadsetMachine(context, mMediaStateListeners, this, mServiceAudioManager);
-        mWiredMachine = new WiredHeadsetMachine(mMediaStateListeners, this, mServiceAudioManager);
+        speakerMode = new SpeakerMode(mServiceAudioManager, audioFocusManager);
+        wiredMode = new WiredMode(mServiceAudioManager, audioFocusManager);
+        bluetoothMode = new BluetoothMode(mServiceAudioManager, audioFocusManager);
+        normalMode = new NormalMode(mServiceAudioManager, audioFocusManager);
+
+        mBluetoothMachine = new BluetoothHeadsetMachine(context, mMediaStateListeners, this, mServiceAudioManager, bluetoothMode);
+        mWiredMachine = new WiredHeadsetMachine(mMediaStateListeners, this, mServiceAudioManager, wiredMode);
 
         mWiredMachine.warmup();
         mBluetoothMachine.warmup();
-
-        speakerMode = new SpeakerMode(mServiceAudioManager);
-        wiredMode = new WiredMode(mServiceAudioManager);
-        bluetoothMode = new BluetoothMode(mServiceAudioManager);
 
         context.registerReceiver(mHeadsetStateReceiver, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
         context.registerReceiver(mHeadsetStateReceiver, new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED));
@@ -247,13 +239,10 @@ public class AudioManager {
         Log.d(TAG, "setSpeakerMode: " + isWiredHeadsetOn() + " " + isBluetoothHeadsetConnected());
         if (isWiredHeadsetOn()) {
             wiredMode.apply(speaker);
-            forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
         } else if (isBluetoothHeadsetConnected()) {
             bluetoothMode.apply(speaker);
-            forceVolumeControlStream(Constants.STREAM_BLUETOOTH_SCO);
         } else {
             speakerMode.apply(speaker);
-            forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
         }
 
         mMediaStateListeners.notif(new ListenerHolder.Callback<IMediaStateListener>() {
@@ -362,15 +351,17 @@ public class AudioManager {
     public void checkOutputRoute() {
         if (isBluetoothHeadsetConnected()) {
             mOutputRoute = AudioRoute.ROUTE_BLUETOOTH;
+            bluetoothMode.requestAudioFocus();
         } else if (isWiredHeadsetOn()) {
             mOutputRoute = AudioRoute.ROUTE_HEADSET;
+            wiredMode.requestAudioFocus();
         } else if (null != mServiceAudioManager && mServiceAudioManager.isSpeakerphoneOn()) {
             mOutputRoute = AudioRoute.ROUTE_SPEAKER;
+            speakerMode.requestAudioFocus();
         } else {
             mOutputRoute = AudioRoute.ROUTE_PHONE;
+            normalMode.requestAudioFocus();
         }
-
-        requestAudioFocus();
     }
 
     private int getUiSoundsStreamType() {

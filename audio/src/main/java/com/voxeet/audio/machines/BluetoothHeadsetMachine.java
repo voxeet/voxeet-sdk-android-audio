@@ -9,12 +9,13 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.voxeet.audio.AudioManager;
+import com.voxeet.audio.AudioStackManager;
 import com.voxeet.audio.listeners.IMediaStateListener;
 import com.voxeet.audio.listeners.ListenerHolder;
+import com.voxeet.audio.mode.AbstractMode;
 import com.voxeet.audio.utils.Validate;
 
-import static android.media.AudioManager.STREAM_VOICE_CALL;
+import static android.media.AudioManager.STREAM_MUSIC;
 
 public class BluetoothHeadsetMachine extends AbstractMachine<BluetoothDevice> {
     private final static String TAG = BluetoothHeadsetMachine.class.getSimpleName();
@@ -46,9 +47,10 @@ public class BluetoothHeadsetMachine extends AbstractMachine<BluetoothDevice> {
 
     public BluetoothHeadsetMachine(Context context,
                                    ListenerHolder<IMediaStateListener> listener,
-                                   AudioManager audioManager,
-                                   android.media.AudioManager manager) {
-        super(listener, audioManager, manager);
+                                   AudioStackManager audioManager,
+                                   android.media.AudioManager manager,
+                                   AbstractMode audioMode) {
+        super(listener, audioManager, manager, audioMode);
 
         mContext = context;
 
@@ -98,7 +100,7 @@ public class BluetoothHeadsetMachine extends AbstractMachine<BluetoothDevice> {
     @Override
     public void enable(boolean isEnabled) {
         Log.d(TAG, "enable: bluetooth " + isEnabled);
-        audioManager.forceVolumeControlStream(STREAM_VOICE_CALL);
+        audioManager.forceVolumeControlStream(STREAM_MUSIC);//STREAM_VOICE_CALL);
 
         audioManager.checkOutputRoute();
         try {

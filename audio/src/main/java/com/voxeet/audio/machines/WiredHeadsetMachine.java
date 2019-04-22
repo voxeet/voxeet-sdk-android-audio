@@ -1,15 +1,19 @@
 package com.voxeet.audio.machines;
 
-import com.voxeet.audio.AudioManager;
+import com.voxeet.audio.AudioStackManager;
 import com.voxeet.audio.listeners.IMediaStateListener;
 import com.voxeet.audio.listeners.ListenerHolder;
+import com.voxeet.audio.mode.AbstractMode;
 
 public class WiredHeadsetMachine extends AbstractMachine<WiredInformation> {
 
     private WiredInformation connect;
 
-    public WiredHeadsetMachine(ListenerHolder<IMediaStateListener> listenerHolder, AudioManager audioManager, android.media.AudioManager manager) {
-        super(listenerHolder, audioManager, manager);
+    public WiredHeadsetMachine(ListenerHolder<IMediaStateListener> listenerHolder,
+                               AudioStackManager audioManager,
+                               android.media.AudioManager manager,
+                               AbstractMode audioMode) {
+        super(listenerHolder, audioManager, manager, audioMode);
     }
 
     @Override
