@@ -29,6 +29,7 @@ import com.voxeet.audio.mode.BluetoothMode;
 import com.voxeet.audio.mode.NormalMode;
 import com.voxeet.audio.mode.SpeakerMode;
 import com.voxeet.audio.mode.WiredMode;
+import com.voxeet.audio.receiver.HeadsetStateReceiver;
 import com.voxeet.audio.utils.Constants;
 import com.voxeet.audio.utils.Invoke;
 
@@ -78,58 +79,16 @@ public class AudioStackManager {
 
     public void disable() {
         enabled = false;
+        mHeadsetStateReceiver.enable(enabled);
     }
 
     public void enable() {
         enabled = true;
-    }
-
-    private class HeadsetStateReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "onReceive: " + intent.getAction());
-            if (!enabled) {
-                Log.d(TAG, "onReceive: the AudioStackManager is disabled, nothing to do for action received");
-                return;
-            }
-
-            String action = intent.getAction();
-            if (null == action) action = "";
-            switch (action) {
-                case Intent.ACTION_HEADSET_PLUG:
-                    int state = intent.getIntExtra("state", -1);
-                    int has_mic = intent.getIntExtra("microphone", -1);
-
-                    WiredInformation information = new WiredInformation(has_mic > 0, state);
-
-                    mWiredMachine.connect(information);
-                    break;
-                case BluetoothDevice.ACTION_ACL_CONNECTED:
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    mBluetoothMachine.connect(device);
-                    break;
-                case BluetoothDevice.ACTION_ACL_DISCONNECTED:
-                    mBluetoothMachine.disconnect();
-                    break;
-                case android.media.AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED:
-
-                    int l_state = intent.getIntExtra(android.media.AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
-                    Log.d(TAG, "Audio SCO: " + android.media.AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED);
-
-                    switch (l_state) {
-                        case android.media.AudioManager.SCO_AUDIO_STATE_CONNECTED:
-                            bluetoothMode.requestAudioFocus();
-                            break;
-                        case android.media.AudioManager.SCO_AUDIO_STATE_DISCONNECTED:
-                            bluetoothMode.abandonAudioFocus();
-                    }
-            }
-        }
+        mHeadsetStateReceiver.enable(enabled);
     }
 
     private AudioStackManager() {
         audioFocusManager = new AudioFocusManager();
-        mHeadsetStateReceiver = new HeadsetStateReceiver();
     }
 
     public AudioStackManager(Context context) {
@@ -144,11 +103,16 @@ public class AudioStackManager {
         bluetoothMode = new BluetoothMode(mServiceAudioManager, audioFocusManager);
         normalMode = new NormalMode(mServiceAudioManager, audioFocusManager);
 
+
         // set the current model to default
         currentMode = normalMode;
 
         mBluetoothMachine = new BluetoothHeadsetMachine(context, mMediaStateListeners, this, mServiceAudioManager, bluetoothMode);
         mWiredMachine = new WiredHeadsetMachine(mMediaStateListeners, this, mServiceAudioManager, wiredMode);
+
+        mHeadsetStateReceiver = new HeadsetStateReceiver(mWiredMachine,
+                mBluetoothMachine,
+                bluetoothMode);
 
         mWiredMachine.warmup();
         mBluetoothMachine.warmup();

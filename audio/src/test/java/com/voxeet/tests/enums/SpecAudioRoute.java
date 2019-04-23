@@ -54,8 +54,20 @@ public class SpecAudioRoute {
 
     @Test
     public void checkValueDefault() {
-        for (int i = 4; i < Integer.MAX_VALUE; i++) {
-            Assert.assertEquals(AudioRoute.valueOf(4), AudioRoute.ROUTE_SPEAKER);
+        int i = Integer.MIN_VALUE;
+        while (i < 0) {
+            if(!AudioRoute.ROUTE_SPEAKER.equals(AudioRoute.valueOf(i))) {
+                Assert.fail("Excepted speaker but no...");
+            }
+            i++;
+        }
+
+        i = 4;
+        while (i < Integer.MAX_VALUE) {
+            if(!AudioRoute.ROUTE_SPEAKER.equals(AudioRoute.valueOf(i))) {
+                Assert.fail("Excepted speaker but no...");
+            }
+            i++;
         }
     }
 
