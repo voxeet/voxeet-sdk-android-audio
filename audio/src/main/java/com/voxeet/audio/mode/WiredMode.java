@@ -22,13 +22,15 @@ public class WiredMode extends AbstractMode {
     public void apply(boolean speaker_state) {
         manager.setSpeakerphoneOn(false);
         manager.setMode(MODE_IN_COMMUNICATION);
-        forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
+        //forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
+
+        requestAudioFocus();
     }
 
     @Override
     public void requestAudioFocus() {
-        forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
-        audioFocusManger.requestAudioFocus(manager);
+        forceVolumeControlStream(requestFocus);
+        audioFocusManger.requestAudioFocus(manager, requestFocus);
     }
 
     @Override

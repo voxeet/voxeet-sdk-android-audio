@@ -28,8 +28,8 @@ public class SpeakerMode extends AbstractMode {
 
     @Override
     public void requestAudioFocus() {
-        forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
-        audioFocusManger.requestAudioFocus(manager);
+        forceVolumeControlStream(requestFocus);
+        audioFocusManger.requestAudioFocus(manager, requestFocus);
     }
 
     @Override
@@ -40,7 +40,8 @@ public class SpeakerMode extends AbstractMode {
     private void applyNonSamsung(boolean speaker_state) {
         manager.setMode(MODE_IN_COMMUNICATION);
         manager.setSpeakerphoneOn(speaker_state);
-        forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
+        //forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
+        requestAudioFocus();
     }
 
     private void applySamsung(boolean speaker_state) {
@@ -48,12 +49,14 @@ public class SpeakerMode extends AbstractMode {
             // route audio to back speaker
             manager.setSpeakerphoneOn(true);
             manager.setMode(MODE_CURRENT);
-            forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
+            //forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
         } else {
             // route audio to earpiece
             manager.setSpeakerphoneOn(speaker_state);
             manager.setMode(MODE_IN_COMMUNICATION);
-            forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
+            //forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
         }
+
+        requestAudioFocus();
     }
 }

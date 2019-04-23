@@ -15,14 +15,13 @@ public class NormalMode extends AbstractMode {
 
     @Override
     public void apply(boolean speaker_state) {
-        forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
-        audioFocusManger.requestAudioFocus(manager);
+        requestAudioFocus();
     }
 
     @Override
     public void requestAudioFocus() {
-        forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
-        audioFocusManger.requestAudioFocus(manager);
+        forceVolumeControlStream(requestFocus);
+        audioFocusManger.requestAudioFocus(manager, requestFocus);
     }
 
     @Override

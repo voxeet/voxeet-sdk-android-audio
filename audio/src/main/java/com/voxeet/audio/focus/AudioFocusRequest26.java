@@ -41,11 +41,11 @@ public class AudioFocusRequest26 implements AudioFocusRequest {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
-    public int requestAudioFocus(@NonNull AudioManager manager) {
-        manager.setMode(AudioManager.MODE_IN_CALL);
+    public int requestAudioFocus(@NonNull AudioManager manager, int audioFocusVolumeType) {
+        manager.setMode(AudioManager.MODE_IN_COMMUNICATION); //MODE_IN_CALL);
         Log.d("AudioFocusRequest", "requestAudioFocus");
         manager.requestAudioFocus(null,
-                AudioManager.STREAM_VOICE_CALL,
+                audioFocusVolumeType, //AudioManager.STREAM_VOICE_CALL,
                 AudioManager.AUDIOFOCUS_GAIN);
 
         return manager.requestAudioFocus(focusRequestBuilt);

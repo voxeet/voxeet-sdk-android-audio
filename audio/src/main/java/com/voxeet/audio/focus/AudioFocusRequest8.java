@@ -16,9 +16,9 @@ public class AudioFocusRequest8 implements AudioFocusRequest {
         };
     }
     @Override
-    public int requestAudioFocus(@NonNull AudioManager manager) {
+    public int requestAudioFocus(@NonNull AudioManager manager, int audioFocusVolumeType) {
         return manager.requestAudioFocus(focusRequest,
-                AudioManager.STREAM_VOICE_CALL,
+                audioFocusVolumeType, //AudioManager.STREAM_VOICE_CALL,
                 AudioManager.AUDIOFOCUS_GAIN);
     }
 

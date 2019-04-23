@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresPermission;
 import android.util.Log;
 
 import com.voxeet.audio.AudioStackManager;

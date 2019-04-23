@@ -12,6 +12,8 @@ public abstract class AbstractMode {
     protected AudioFocusManager audioFocusManger;
     protected AudioManager manager;
     private AudioRoute audioRoute;
+    protected int requestFocus = Constants.STREAM_VOICE_CALL;
+    private int abandonFocus = Constants.STREAM_MUSIC;
 
     private AbstractMode() {
 
@@ -36,7 +38,7 @@ public abstract class AbstractMode {
     public void abandonAudioFocus() {
         manager.setMode(android.media.AudioManager.MODE_NORMAL);
         audioFocusManger.abandonAudioFocus(manager);
-        forceVolumeControlStream(Constants.STREAM_MUSIC);
+        forceVolumeControlStream(abandonFocus);
     }
 
     protected void forceVolumeControlStream(int volumeMode) {
@@ -45,5 +47,10 @@ public abstract class AbstractMode {
 
     public final AudioRoute getAudioRoute() {
         return audioRoute;
+    }
+
+    public void configureVolumeStream(int requestFocus, int abandonFocus) {
+        this.requestFocus = requestFocus;
+        this.abandonFocus = abandonFocus;
     }
 }

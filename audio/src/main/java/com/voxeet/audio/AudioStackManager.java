@@ -350,12 +350,21 @@ public class AudioStackManager {
     }
 
     public AudioStackManager requestAudioFocus() {
-        if(null != currentMode) currentMode.requestAudioFocus();
+        if (null != currentMode) currentMode.requestAudioFocus();
         return this;
     }
 
     public AudioStackManager abandonAudioFocus() {
-        if(null != currentMode) currentMode.abandonAudioFocus();
+        if (null != currentMode) currentMode.abandonAudioFocus();
+        return this;
+    }
+
+    public AudioStackManager configureVolumeStream(int requestFocus, int abandonFocus) {
+        bluetoothMode.configureVolumeStream(requestFocus, abandonFocus);
+        normalMode.configureVolumeStream(requestFocus, abandonFocus);
+        speakerMode.configureVolumeStream(requestFocus, abandonFocus);
+        wiredMode.configureVolumeStream(requestFocus, abandonFocus);
+
         return this;
     }
 

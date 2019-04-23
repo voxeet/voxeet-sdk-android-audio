@@ -17,8 +17,8 @@ public class AudioFocusManager implements AudioFocusRequest{
     }
 
     @Override
-    public int requestAudioFocus(@NonNull AudioManager manager) {
-        return audioFocus.requestAudioFocus(manager);
+    public int requestAudioFocus(@NonNull AudioManager manager, int audioFocusVolumeType) {
+        return audioFocus.requestAudioFocus(manager, audioFocusVolumeType);
     }
 
     @Override

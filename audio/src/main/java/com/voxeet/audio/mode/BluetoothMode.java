@@ -19,13 +19,14 @@ public class BluetoothMode extends AbstractMode {
     public void apply(boolean speaker_state) {
         manager.setSpeakerphoneOn(false);
         manager.setMode(MODE_IN_COMMUNICATION);
-        forceVolumeControlStream(Constants.STREAM_BLUETOOTH_SCO);
+        //forceVolumeControlStream(Constants.STREAM_BLUETOOTH_SCO | requestFocus);
+        requestAudioFocus();
     }
 
     @Override
     public void requestAudioFocus() {
-        forceVolumeControlStream(Constants.STREAM_BLUETOOTH_SCO);
-        audioFocusManger.requestAudioFocus(manager);
+        forceVolumeControlStream(Constants.STREAM_BLUETOOTH_SCO | requestFocus);
+        audioFocusManger.requestAudioFocus(manager, Constants.STREAM_BLUETOOTH_SCO | requestFocus);
     }
 
     @Override
