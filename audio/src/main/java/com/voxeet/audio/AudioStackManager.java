@@ -287,16 +287,7 @@ public class AudioStackManager {
     public boolean isWiredHeadsetOn() {
         return wiredMode.isConnected();
     }
-
-    /**
-     * Check for wired or bluetooth headset
-     *
-     * @return true if at least one device is properly connected
-     */
-    public boolean isHeadphonesPlugged() {
-        return isWiredHeadsetOn() || isBluetoothHeadsetConnected();
-    }
-
+    
     public void checkOutputRoute() {
         if (isBluetoothHeadsetConnected()) {
             bluetoothMode.requestAudioFocus();
