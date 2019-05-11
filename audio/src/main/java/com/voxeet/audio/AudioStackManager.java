@@ -2,28 +2,22 @@ package com.voxeet.audio;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.media.AudioDeviceInfo;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.Window;
 
 import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.audio.listeners.IAudioRouteListener;
 import com.voxeet.audio.listeners.IMediaStateListener;
 import com.voxeet.audio.listeners.ListenerHolder;
-import com.voxeet.audio.machines.AbstractMachine;
 import com.voxeet.audio.machines.BluetoothHeadsetMachine;
 import com.voxeet.audio.machines.WiredHeadsetMachine;
-import com.voxeet.audio.machines.WiredInformation;
 import com.voxeet.audio.mode.AbstractMode;
 import com.voxeet.audio.mode.BluetoothMode;
 import com.voxeet.audio.mode.NormalMode;

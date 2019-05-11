@@ -4,11 +4,9 @@ import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.voxeet.audio.AudioRoute;
 import com.voxeet.audio.focus.AudioFocusManager;
-import com.voxeet.audio.utils.Constants;
 
 import static android.media.AudioManager.MODE_IN_COMMUNICATION;
 

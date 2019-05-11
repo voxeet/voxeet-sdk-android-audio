@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 
 import com.voxeet.audio.AudioRoute;
 import com.voxeet.audio.focus.AudioFocusManager;
-import com.voxeet.audio.utils.Constants;
 
 public class NormalMode extends AbstractMode {
 
