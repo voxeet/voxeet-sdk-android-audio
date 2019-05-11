@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresPermission;
 import android.util.Log;
 
 import com.voxeet.audio.AudioStackManager;
@@ -58,13 +57,6 @@ public class BluetoothHeadsetMachine extends AbstractMachine<BluetoothDevice> {
         mBluetoothHeadsetListener = new BluetoothHeadsetListener();
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter != null) {
-            try {
-                mBluetoothAdapter.getProfileProxy(context, mBluetoothHeadsetListener, BluetoothProfile.HEADSET);
-            } catch (SecurityException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     @Override
@@ -95,6 +87,14 @@ public class BluetoothHeadsetMachine extends AbstractMachine<BluetoothDevice> {
 
     @Override
     public void warmup() {
+        if (mBluetoothAdapter != null) {
+            try {
+                mBluetoothAdapter.getProfileProxy(mContext, mBluetoothHeadsetListener, BluetoothProfile.HEADSET);
+            } catch (SecurityException e) {
+                e.printStackTrace();
+            }
+        }
+
         checkForBluetoothDeviceAtStartUp();
     }
 
