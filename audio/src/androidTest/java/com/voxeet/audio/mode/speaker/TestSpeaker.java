@@ -1,10 +1,10 @@
-package com.voxeet.tests.modes.speaker;
+package com.voxeet.audio.mode.speaker;
 
 import com.voxeet.audio.AudioStackManager;
 import com.voxeet.audio.mode.SpeakerMode;
-import com.voxeet.tests.VoxeetRunner;
-import com.voxeet.tests.utils.AudioStackManagerUtils;
-import com.voxeet.tests.utils.CheckFields;
+import com.voxeet.audio.VoxeetRunner;
+import com.voxeet.audio.utils.AudioStackManagerUtils;
+import com.voxeet.audio.utils.CheckFields;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -25,7 +25,7 @@ public class TestSpeaker {
     @Test
     public void testSpeakerValid() {
         try {
-            SpeakerMode speaker = (SpeakerMode) CheckFields.getField(audioStackManager, "speakerMode");
+            SpeakerMode speaker = CheckFields.getField(audioStackManager, "speakerMode");
             Assert.assertNotNull(speaker);
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,4 +1,4 @@
-package com.voxeet.tests.modes.speaker;
+package com.voxeet.audio.mode.speaker;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

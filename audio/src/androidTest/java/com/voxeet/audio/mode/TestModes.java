@@ -1,13 +1,9 @@
-package com.voxeet.tests.modes;
+package com.voxeet.audio.mode;
 
 import com.voxeet.audio.AudioStackManager;
-import com.voxeet.audio.mode.BluetoothMode;
-import com.voxeet.audio.mode.NormalMode;
-import com.voxeet.audio.mode.SpeakerMode;
-import com.voxeet.audio.mode.WiredMode;
-import com.voxeet.tests.VoxeetRunner;
-import com.voxeet.tests.utils.AudioStackManagerUtils;
-import com.voxeet.tests.utils.CheckFields;
+import com.voxeet.audio.VoxeetRunner;
+import com.voxeet.audio.utils.AudioStackManagerUtils;
+import com.voxeet.audio.utils.CheckFields;
 
 import org.junit.Assert;
 import org.junit.Before;

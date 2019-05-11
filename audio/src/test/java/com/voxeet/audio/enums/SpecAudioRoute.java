@@ -1,4 +1,4 @@
-package com.voxeet.tests.enums;
+package com.voxeet.audio.enums;
 
 import com.voxeet.audio.AudioRoute;
 

@@ -1,4 +1,4 @@
-package com.voxeet.tests;
+package com.voxeet.audio;
 
 import android.app.Application;
 

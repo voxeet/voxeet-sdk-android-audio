@@ -1,4 +1,4 @@
-package com.voxeet.tests.utils;
+package com.voxeet.audio.utils;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;

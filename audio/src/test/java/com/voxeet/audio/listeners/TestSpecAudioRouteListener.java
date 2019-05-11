@@ -1,6 +1,4 @@
-package com.voxeet.tests.listeners;
-
-import com.voxeet.audio.listeners.IAudioRouteListener;
+package com.voxeet.audio.listeners;
 
 import org.junit.Assert;
 import org.junit.Test;
