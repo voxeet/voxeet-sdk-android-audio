@@ -39,7 +39,7 @@ public class BluetoothHeadsetMachine extends AbstractMachine<BluetoothDevice> {
         }
     };
 
-    private final BluetoothAdapter mBluetoothAdapter;
+    private BluetoothAdapter mBluetoothAdapter;
     private BluetoothHeadsetListener mBluetoothHeadsetListener;
 
     private BluetoothHeadset mCurrentBluetoothHeadset;
@@ -56,7 +56,13 @@ public class BluetoothHeadsetMachine extends AbstractMachine<BluetoothDevice> {
 
         mBluetoothHeadsetListener = new BluetoothHeadsetListener();
 
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        try {
+            mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        }catch (VerifyError exception) {
+            Log.d(TAG, "BluetoothHeadsetMachine: VerifyError exception for this device. Please report");
+            mBluetoothAdapter = null;
+            exception.printStackTrace();
+        }
     }
 
     @Override

@@ -7,7 +7,7 @@ This Android library helps managing the various event and feature around externa
 ```gradle
 dependencies {
   //add this one if you want to use the logic-only SDK
-  compile ('com.voxeet.sdk:audio:1.0.3') {
+  compile ('com.voxeet.sdk:audio:1.0.5') {
     transitive = true
   }
 }
@@ -37,3 +37,11 @@ The various test implementation results can be found in the following folders. U
 - [Unit Tests](./audio/build/reports/tests/testDebugUnitTest/index.html)
 - [Integration Tests](./audio/build/reports/androidTests/connected/index.html)
 - [Code Coverage](./audio/build/reports/coverage/debug/index.html)
+
+# Changelogs
+
+v1.0.5 :
+  - address issue on some HTC devices where the `getDefaultAdapter()` for Bluetooth would trigger a VerifyError
+
+v1.0.4 :
+  - Improve Bluetooth management with a fix in the constructor to use the warmup method
