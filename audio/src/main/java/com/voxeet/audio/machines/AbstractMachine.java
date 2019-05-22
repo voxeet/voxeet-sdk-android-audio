@@ -1,6 +1,6 @@
 package com.voxeet.audio.machines;
 
-import android.util.Log;
+import com.voxeet.audio.utils.Log;
 
 import com.voxeet.audio.AudioStackManager;
 import com.voxeet.audio.listeners.IMediaStateListener;

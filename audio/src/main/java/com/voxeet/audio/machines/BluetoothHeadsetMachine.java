@@ -7,7 +7,7 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.util.Log;
+import com.voxeet.audio.utils.Log;
 
 import com.voxeet.audio.AudioStackManager;
 import com.voxeet.audio.listeners.IMediaStateListener;
@@ -107,17 +107,21 @@ public class BluetoothHeadsetMachine extends AbstractMachine<BluetoothDevice> {
     @Override
     public void enable(boolean isEnabled) {
         Log.d(TAG, "enable: bluetooth " + isEnabled);
-        audioManager.forceVolumeControlStream(STREAM_MUSIC);//STREAM_VOICE_CALL);
+        if(audioManager.isEnabled()) {
+            audioManager.forceVolumeControlStream(STREAM_MUSIC);//STREAM_VOICE_CALL);
 
-        audioManager.checkOutputRoute();
-        try {
-            if (isEnabled) {
-                startBluetoothSco();
-            } else {
-                stopBluetoothSco();
+            audioManager.checkOutputRoute();
+            try {
+                if (isEnabled) {
+                    startBluetoothSco();
+                } else {
+                    stopBluetoothSco();
+                }
+            } catch (NullPointerException e) { // Workaround for lollipop 5.0
+                Log.d(TAG, "No bluetooth headset connected");
             }
-        } catch (NullPointerException e) { // Workaround for lollipop 5.0
-            Log.d(TAG, "No bluetooth headset connected");
+        }else{
+            Log.d(TAG, "Calling enable while manager is disabled");
         }
     }
 
@@ -173,9 +177,13 @@ public class BluetoothHeadsetMachine extends AbstractMachine<BluetoothDevice> {
 
             Log.d(TAG, "onServiceConnected: isBluetoothScoStarted = " + isBluetoothScoStarted);
 
-            startBluetoothSco();
-            audioManager.checkOutputRoute();
-            audioManager.notifyAudioRoute();
+            if(audioManager.isEnabled()) {
+                startBluetoothSco();
+                audioManager.checkOutputRoute();
+                audioManager.notifyAudioRoute();
+            } else {
+                Log.d(TAG, "not starting sco, checking or notify... disabled");
+            }
         }
     }
 

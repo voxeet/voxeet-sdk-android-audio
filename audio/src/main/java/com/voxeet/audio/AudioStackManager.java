@@ -10,6 +10,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import com.voxeet.audio.utils.Log;
 import android.view.Window;
 
 import com.voxeet.audio.focus.AudioFocusManager;
@@ -72,13 +73,18 @@ public class AudioStackManager {
     }
 
     public void disable() {
+        mBluetoothMachine.enable(false);
+        Log.d(TAG, "disable");
         enabled = false;
         mHeadsetStateReceiver.enable(enabled);
     }
 
     public void enable() {
+        Log.d(TAG, "enable");
         enabled = true;
         mHeadsetStateReceiver.enable(enabled);
+
+        checkOutputRoute();
     }
 
     private AudioStackManager() {
@@ -87,6 +93,8 @@ public class AudioStackManager {
 
     public AudioStackManager(Context context) {
         this();
+
+        Log.d(TAG, "AudioStackManager: init");
 
         mContext = context;
 
@@ -119,6 +127,7 @@ public class AudioStackManager {
     }
 
     public void stop() {
+        Log.d(TAG, "stop: ");
         mContext.unregisterReceiver(mHeadsetStateReceiver);
         mBluetoothMachine.enable(false);
         mBluetoothMachine.stop();
@@ -155,6 +164,7 @@ public class AudioStackManager {
      */
     @NonNull
     public AudioRoute outputRoute() {
+        Log.d(TAG, "outputRoute: ");
         return currentMode.getAudioRoute();
     }
 
@@ -165,6 +175,7 @@ public class AudioStackManager {
      * @param route set the valid audio route
      */
     public boolean setOutputRoute(@NonNull AudioRoute route) {
+        Log.d(TAG, "setOutputRoute: enabled ?" + enabled +" " + route);
         switch (route) {
             case ROUTE_SPEAKER:
                 if (!isWiredHeadsetOn() && !isBluetoothHeadsetConnected()) {
@@ -174,11 +185,13 @@ public class AudioStackManager {
                 }
                 break;
             case ROUTE_BLUETOOTH:
-                if (isBluetoothHeadsetConnected()) mBluetoothMachine.enable(true);
-                break;
             case ROUTE_HEADSET:
             case ROUTE_PHONE:
-                setSpeakerMode(false);
+                if (isBluetoothHeadsetConnected()) {
+                    mBluetoothMachine.enable(true);
+                } else {
+                    setSpeakerMode(false);
+                }
                 break;
             default:
                 break;
@@ -200,11 +213,15 @@ public class AudioStackManager {
     }
 
     public void setSpeakerMode(final boolean speaker) {
+        Log.d(TAG, "setSpeakerMode: enabled ?" + enabled +" " + speaker);
         if (isWiredHeadsetOn()) {
+            Log.d(TAG, "setSpeakerMode: wired headset");
             wiredMode.apply(speaker);
         } else if (isBluetoothHeadsetConnected()) {
+            Log.d(TAG, "setSpeakerMode: bluetooth");
             bluetoothMode.apply(speaker);
         } else {
+            Log.d(TAG, "setSpeakerMode: standard");
             speakerMode.apply(speaker);
         }
 
@@ -283,27 +300,45 @@ public class AudioStackManager {
     }
     
     public void checkOutputRoute() {
+        if(!enabled) {
+            Log.d(TAG, "checkOutputRoute: unable to comply, is disabled");
+            return;
+        }
+
+        Log.d(TAG, "checkOutputRoute in progress");
+
         if (isBluetoothHeadsetConnected()) {
+            Log.d(TAG, "checkOutputRoute: bluetooth connected");
             bluetoothMode.requestAudioFocus();
             currentMode = bluetoothMode;
         } else if (isWiredHeadsetOn()) {
+            Log.d(TAG, "checkOutputRoute: wired on");
             wiredMode.requestAudioFocus();
             currentMode = wiredMode;
         } else if (null != mServiceAudioManager && mServiceAudioManager.isSpeakerphoneOn()) {
+            Log.d(TAG, "checkOutputRoute: speaker");
             speakerMode.requestAudioFocus();
             currentMode = speakerMode;
         } else {
+            Log.d(TAG, "checkOutputRoute: normal mode");
             normalMode.requestAudioFocus();
             currentMode = normalMode;
         }
     }
 
     public AudioStackManager requestAudioFocus() {
+        Log.d(TAG, "requestAudioFocus in progress " + currentMode);
+        if(!enabled) {
+            Log.d(TAG, "requestAudioFocus: unable to comply, is disabled");
+            return this;
+        }
+
         if (null != currentMode) currentMode.requestAudioFocus();
         return this;
     }
 
     public AudioStackManager abandonAudioFocus() {
+        mBluetoothMachine.enable(false);
         if (null != currentMode) currentMode.abandonAudioFocus();
         return this;
     }
@@ -326,5 +361,9 @@ public class AudioStackManager {
 
     private int getUiSoundsStreamType() {
         return Invoke.callReturnIntVoidArg(mServiceAudioManager, "getUiSoundsStreamType", Constants.STREAM_SYSTEM);
+    }
+
+    public boolean isEnabled() {
+        return enabled;
     }
 }
