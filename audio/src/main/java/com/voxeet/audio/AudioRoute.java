@@ -8,7 +8,8 @@ public enum AudioRoute {
     ROUTE_HEADSET(false),
     ROUTE_PHONE(true),
     ROUTE_SPEAKER(false),
-    ROUTE_BLUETOOTH(false);
+    ROUTE_BLUETOOTH(false),
+    ROUTE_MEDIA(false);
 
     private boolean mProximitySensor;
 
@@ -30,6 +31,8 @@ public enum AudioRoute {
                 return ROUTE_SPEAKER;
             case 3:
                 return ROUTE_BLUETOOTH;
+            case 4:
+                return ROUTE_MEDIA;
             default:
                 return ROUTE_SPEAKER;
         }

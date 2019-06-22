@@ -10,6 +10,8 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
+import com.voxeet.audio.mode.MediaMode;
 import com.voxeet.audio.utils.Log;
 import android.view.Window;
 
@@ -45,6 +47,7 @@ public class AudioStackManager {
     private WiredMode wiredMode;
     private BluetoothMode bluetoothMode;
     private NormalMode normalMode;
+    private MediaMode mediaMode;
 
     private AbstractMode currentMode;
 
@@ -104,6 +107,7 @@ public class AudioStackManager {
         wiredMode = new WiredMode(mServiceAudioManager, audioFocusManager);
         bluetoothMode = new BluetoothMode(mServiceAudioManager, audioFocusManager);
         normalMode = new NormalMode(mServiceAudioManager, audioFocusManager);
+        mediaMode = new MediaMode(mServiceAudioManager, audioFocusManager);
 
 
         // set the current model to default
@@ -298,8 +302,24 @@ public class AudioStackManager {
     public boolean isWiredHeadsetOn() {
         return wiredMode.isConnected();
     }
+
+    public void setMediaRoute() {
+        currentMode = mediaMode;
+        checkOutputRoute();
+    }
+
+    public void unsetMediaRoute() {
+        currentMode = normalMode;
+        checkOutputRoute();
+    }
     
     public void checkOutputRoute() {
+        if(mediaMode == currentMode) {
+            bluetoothMode.requestAudioFocus();
+            android.util.Log.d(TAG, "checkOutputRoute: mediaMode selected");
+            return;
+        }
+
         if(!enabled) {
             Log.d(TAG, "checkOutputRoute: unable to comply, is disabled");
             return;
@@ -348,6 +368,7 @@ public class AudioStackManager {
         normalMode.configureVolumeStream(requestFocus, abandonFocus);
         speakerMode.configureVolumeStream(requestFocus, abandonFocus);
         wiredMode.configureVolumeStream(requestFocus, abandonFocus);
+        //don't update media Mode !
 
         return this;
     }
