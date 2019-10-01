@@ -8,11 +8,11 @@ import android.support.annotation.NonNull;
 public class AudioFocusManager implements AudioFocusRequest{
     private final AudioFocusRequest audioFocus;
 
-    public AudioFocusManager() {
+    public AudioFocusManager(@NonNull AudioFocusMode mode) {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioFocus = new AudioFocusRequest26();
+            audioFocus = new AudioFocusRequest26(mode);
         } else {
-            audioFocus = new AudioFocusRequest8();
+            audioFocus = new AudioFocusRequest8(mode);
         }
     }
 

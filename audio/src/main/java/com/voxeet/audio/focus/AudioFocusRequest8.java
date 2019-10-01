@@ -3,11 +3,16 @@ package com.voxeet.audio.focus;
 import android.media.AudioManager;
 import android.support.annotation.NonNull;
 
+import com.voxeet.audio.utils.Log;
+
 public class AudioFocusRequest8 implements AudioFocusRequest {
 
+    private final AudioFocusMode mode;
     private AudioManager.OnAudioFocusChangeListener focusRequest;
 
-    public AudioFocusRequest8() {
+    public AudioFocusRequest8(AudioFocusMode mode) {
+        this.mode = mode;
+        Log.d("AudioFocusRequest8", "ctor : this mode does not use the mode " + mode);
         focusRequest = new AudioManager.OnAudioFocusChangeListener() {
             @Override
             public void onAudioFocusChange(int focusChange) {
@@ -15,6 +20,7 @@ public class AudioFocusRequest8 implements AudioFocusRequest {
             }
         };
     }
+
     @Override
     public int requestAudioFocus(@NonNull AudioManager manager, int audioFocusVolumeType) {
         return manager.requestAudioFocus(focusRequest,

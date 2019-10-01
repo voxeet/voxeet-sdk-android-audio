@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.voxeet.audio.focus.AudioFocusMode;
 import com.voxeet.audio.mode.MediaMode;
 import com.voxeet.audio.utils.Log;
 import android.view.Window;
@@ -39,6 +40,7 @@ import java.util.List;
 
 public class AudioStackManager {
     private static final String TAG = AudioStackManager.class.getSimpleName();
+    private final AudioFocusManager audioFocusManagerMedia;
     private WiredHeadsetMachine mWiredMachine;
     private BluetoothHeadsetMachine mBluetoothMachine;
     private Context mContext;
@@ -68,7 +70,7 @@ public class AudioStackManager {
         }
     });
 
-    private AudioFocusManager audioFocusManager;
+    private AudioFocusManager audioFocusManagerCall;
     private boolean enabled;
 
     public void notifyAudioRoute() {
@@ -91,7 +93,8 @@ public class AudioStackManager {
     }
 
     private AudioStackManager() {
-        audioFocusManager = new AudioFocusManager();
+        audioFocusManagerCall = new AudioFocusManager(AudioFocusMode.CALL);
+        audioFocusManagerMedia = new AudioFocusManager(AudioFocusMode.MEDIA);
     }
 
     public AudioStackManager(Context context) {
@@ -103,11 +106,11 @@ public class AudioStackManager {
 
         mServiceAudioManager = (android.media.AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
-        speakerMode = new SpeakerMode(mServiceAudioManager, audioFocusManager);
-        wiredMode = new WiredMode(mServiceAudioManager, audioFocusManager);
-        bluetoothMode = new BluetoothMode(mServiceAudioManager, audioFocusManager);
-        normalMode = new NormalMode(mServiceAudioManager, audioFocusManager);
-        mediaMode = new MediaMode(mServiceAudioManager, audioFocusManager);
+        speakerMode = new SpeakerMode(mServiceAudioManager, audioFocusManagerCall);
+        wiredMode = new WiredMode(mServiceAudioManager, audioFocusManagerCall);
+        bluetoothMode = new BluetoothMode(mServiceAudioManager, audioFocusManagerCall);
+        normalMode = new NormalMode(mServiceAudioManager, audioFocusManagerCall);
+        mediaMode = new MediaMode(mServiceAudioManager, audioFocusManagerMedia);
 
 
         // set the current model to default
@@ -315,7 +318,7 @@ public class AudioStackManager {
     
     public void checkOutputRoute() {
         if(mediaMode == currentMode) {
-            bluetoothMode.requestAudioFocus();
+            mediaMode.requestAudioFocus();
             android.util.Log.d(TAG, "checkOutputRoute: mediaMode selected");
             return;
         }

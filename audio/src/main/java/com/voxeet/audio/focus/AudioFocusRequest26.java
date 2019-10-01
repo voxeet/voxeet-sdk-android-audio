@@ -6,7 +6,8 @@ import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
-import android.util.Log;
+
+import com.voxeet.audio.utils.Log;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class AudioFocusRequest26 implements AudioFocusRequest {
@@ -16,12 +17,24 @@ public class AudioFocusRequest26 implements AudioFocusRequest {
     private static Handler sHandler = new Handler();
     private final AudioManager.OnAudioFocusChangeListener focusRequest;
     private final android.media.AudioFocusRequest focusRequestBuilt;
+    private final AudioFocusMode mode;
 
     @RequiresApi(Build.VERSION_CODES.O)
-    public AudioFocusRequest26() {
+    public AudioFocusRequest26(AudioFocusMode mode) {
+
+        int usage = AudioAttributes.USAGE_VOICE_COMMUNICATION;
+        int content = AudioAttributes.CONTENT_TYPE_SPEECH;
+        this.mode = mode;
+        switch(mode) {
+            case MEDIA:
+                usage = AudioAttributes.USAGE_MEDIA;
+                content = AudioAttributes.CONTENT_TYPE_MUSIC;
+                break;
+            default:
+        }
         playbackAttributes = new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .setUsage(usage)
+                .setContentType(content)
                 .build();
 
         focusRequest = new AudioManager.OnAudioFocusChangeListener() {
@@ -42,7 +55,9 @@ public class AudioFocusRequest26 implements AudioFocusRequest {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public int requestAudioFocus(@NonNull AudioManager manager, int audioFocusVolumeType) {
-        manager.setMode(AudioManager.MODE_IN_COMMUNICATION); //MODE_IN_CALL);
+        manager.setMode(AudioFocusMode.CALL.equals(mode) ?
+                AudioManager.MODE_IN_COMMUNICATION :
+                AudioManager.MODE_NORMAL); //MODE_IN_CALL);
         Log.d("AudioFocusRequest", "requestAudioFocus");
         manager.requestAudioFocus(null,
                 audioFocusVolumeType, //AudioManager.STREAM_VOICE_CALL,

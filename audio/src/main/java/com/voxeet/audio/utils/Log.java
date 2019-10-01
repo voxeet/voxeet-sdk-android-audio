@@ -3,11 +3,19 @@ package com.voxeet.audio.utils;
 import android.support.annotation.NonNull;
 
 public class Log {
+    private static boolean enable = false;
+
+    public static void enable(boolean enable) {
+        Log.enable = enable;
+    }
+
     public static void d(@NonNull String tag, @NonNull String line) {
-        android.util.Log.d("AudioSDK", tag+" :: " + line);
+        if (!enable) return;
+        android.util.Log.d("AudioSDK", tag + " :: " + line);
     }
 
     public static void e(String tag, String s) {
-        android.util.Log.e("AudioSDK",tag+" :: " + s);
+        if (!enable) return;
+        android.util.Log.e("AudioSDK", tag + " :: " + s);
     }
 }
