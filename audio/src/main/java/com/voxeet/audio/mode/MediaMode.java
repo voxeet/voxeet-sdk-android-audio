@@ -21,7 +21,9 @@ public class MediaMode extends AbstractMode {
     @Override
     public void requestAudioFocus() {
         forceVolumeControlStream(Constants.STREAM_MUSIC);
-        audioFocusManger.requestAudioFocus(manager, Constants.STREAM_MUSIC);
+
+        //commenting this one - requesting audio focus for media with Spotify "pause" the music
+        //audioFocusManger.requestAudioFocus(manager, Constants.STREAM_MUSIC);
     }
 
     @Override
