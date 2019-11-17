@@ -46,6 +46,6 @@ ext {
     targetSdkVersion = 27
     supportLibVersion = "28.0.0"
 
-    audioSdkVersion = "1.0.10"
+    audioSdkVersion = "1.0.11"
 }
 
