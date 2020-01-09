@@ -5,7 +5,7 @@ import android.media.AudioManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
 
-import com.voxeet.audio.AudioRoute;
+import com.voxeet.audio.MediaDevice;
 import com.voxeet.audio.focus.AudioFocusManager;
 
 import static android.media.AudioManager.MODE_IN_COMMUNICATION;
@@ -13,7 +13,7 @@ import static android.media.AudioManager.MODE_IN_COMMUNICATION;
 public class WiredMode extends AbstractMode {
 
     public WiredMode(@NonNull AudioManager manager, @NonNull AudioFocusManager audioFocusManager) {
-        super(manager, audioFocusManager, AudioRoute.ROUTE_HEADSET);
+        super(manager, audioFocusManager, MediaDevice.ROUTE_HEADSET);
     }
 
     @Override

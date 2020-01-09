@@ -146,19 +146,19 @@ public class AudioStackManager {
      * @return a non null route
      */
     @NonNull
-    public List<AudioRoute> availableRoutes() {
-        List<AudioRoute> routes = new ArrayList<>();
+    public List<MediaDevice> availableRoutes() {
+        List<MediaDevice> routes = new ArrayList<>();
 
-        routes.add(AudioRoute.ROUTE_SPEAKER);
+        routes.add(MediaDevice.ROUTE_SPEAKER);
 
         if (isWiredHeadsetOn()) {
-            routes.add(AudioRoute.ROUTE_HEADSET);
+            routes.add(MediaDevice.ROUTE_HEADSET);
         } else {
-            routes.add(AudioRoute.ROUTE_PHONE);
+            routes.add(MediaDevice.ROUTE_PHONE);
         }
 
         if (isBluetoothHeadsetConnected()) {
-            routes.add(AudioRoute.ROUTE_BLUETOOTH);
+            routes.add(MediaDevice.ROUTE_BLUETOOTH);
         }
 
         return routes;
@@ -170,7 +170,7 @@ public class AudioStackManager {
      * @return a non null audio route
      */
     @NonNull
-    public AudioRoute outputRoute() {
+    public MediaDevice outputRoute() {
         Log.d(TAG, "outputRoute: ");
         return currentMode.getAudioRoute();
     }
@@ -181,7 +181,7 @@ public class AudioStackManager {
      *
      * @param route set the valid audio route
      */
-    public boolean setOutputRoute(@NonNull AudioRoute route) {
+    public boolean setOutputRoute(@NonNull MediaDevice route) {
         Log.d(TAG, "setOutputRoute: enabled ?" + enabled +" " + route);
         switch (route) {
             case ROUTE_SPEAKER:

@@ -1,10 +1,19 @@
 package com.voxeet.audio;
 
+import com.voxeet.audio.utils.Annotate;
+
 /**
  * Specific routes for audio devices on Android
+ *
+ * The possible routes are :
+ * - ROUTE_HEADSET
+ * - ROUTE_PHONE
+ * - ROUTE_SPEAKER
+ * - ROUTE_BLUETOOTH
+ * - ROUTE_MEDIA
  */
-
-public enum AudioRoute {
+@Annotate
+public enum MediaDevice {
     ROUTE_HEADSET(false),
     ROUTE_PHONE(true),
     ROUTE_SPEAKER(false),
@@ -13,7 +22,7 @@ public enum AudioRoute {
 
     private boolean mProximitySensor;
 
-    AudioRoute(boolean proximity_sensor) {
+    MediaDevice(boolean proximity_sensor) {
         mProximitySensor = proximity_sensor;
     }
 
@@ -21,7 +30,7 @@ public enum AudioRoute {
         return mProximitySensor;
     }
 
-    public static AudioRoute valueOf(int value) {
+    public static MediaDevice valueOf(int value) {
         switch (value) {
             case 0:
                 return ROUTE_HEADSET;

@@ -1,2 +1,2 @@
 //project to get info about audio
-include ':audio'
+include ':audio', ':audiosample'

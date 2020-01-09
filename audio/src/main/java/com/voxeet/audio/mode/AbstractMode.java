@@ -3,7 +3,7 @@ package com.voxeet.audio.mode;
 import android.media.AudioManager;
 import android.support.annotation.NonNull;
 
-import com.voxeet.audio.AudioRoute;
+import com.voxeet.audio.MediaDevice;
 import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.audio.utils.Constants;
 import com.voxeet.audio.utils.Invoke;
@@ -11,7 +11,7 @@ import com.voxeet.audio.utils.Invoke;
 public abstract class AbstractMode {
     protected AudioFocusManager audioFocusManger;
     protected AudioManager manager;
-    private AudioRoute audioRoute;
+    private MediaDevice audioRoute;
     protected int requestFocus = Constants.STREAM_VOICE_CALL;
     private int abandonFocus = Constants.STREAM_MUSIC;
 
@@ -21,7 +21,7 @@ public abstract class AbstractMode {
 
     public AbstractMode(@NonNull AudioManager manager,
                         @NonNull AudioFocusManager audioFocusManager,
-                        @NonNull AudioRoute audioRoute) {
+                        @NonNull MediaDevice audioRoute) {
         this();
 
         this.manager = manager;
@@ -45,7 +45,7 @@ public abstract class AbstractMode {
         Invoke.callVoidIntArg(manager, "forceVolumeControlStream", volumeMode);
     }
 
-    public final AudioRoute getAudioRoute() {
+    public final MediaDevice getAudioRoute() {
         return audioRoute;
     }
 

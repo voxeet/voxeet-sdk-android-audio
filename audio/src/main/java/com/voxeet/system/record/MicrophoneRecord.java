@@ -1,13 +1,14 @@
 package com.voxeet.system.record;
 
-import android.content.Context;
 import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
+import com.voxeet.system.log.Logging;
 
 import java.nio.ByteBuffer;
 
@@ -16,13 +17,15 @@ public class MicrophoneRecord {
 
     // Default audio data format is PCM 16 bit per sample.
     // Guaranteed to be supported by all devices.
-    private static final int BITS_PER_SAMPLE = 16;
+    public static final int BITS_PER_SAMPLE = 16;
+
+    public static final int DEFAULT_SAMPLE_RATE = 48000;
 
     // Requested size of each recorded buffer provided to the client.
-    private static final int CALLBACK_BUFFER_SIZE_MS = 10;
+    public static final int CALLBACK_BUFFER_SIZE_MS = 10;
 
     // Average number of callbacks per second.
-    private static final int BUFFERS_PER_SECOND = 1000 / CALLBACK_BUFFER_SIZE_MS;
+    public static final int BUFFERS_PER_SECOND = 1000 / CALLBACK_BUFFER_SIZE_MS;
 
     // We ask for a native buffer size of BUFFER_SIZE_FACTOR * (minimum required
     // buffer size). The extra space is allocated to guard against glitches under
@@ -31,15 +34,15 @@ public class MicrophoneRecord {
 
     // The AudioRecordJavaThread is allowed to wait for successful call to join()
     // but the wait times out afther this amount of time.
-    private static final long AUDIO_RECORD_THREAD_JOIN_TIMEOUT_MS = 2000;
+    public static final long AUDIO_RECORD_THREAD_JOIN_TIMEOUT_MS = 2000;
 
     public static final int DEFAULT_AUDIO_SOURCE = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
 
-    private final Context context;
-    private final AudioManager audioManager;
     private final int audioSource;
-
-    private long nativeAudioRecord;
+    private final IMicrophoneInformationProvider informationProvider;
+    private final AudioEffects effects;
+    private IMicrophoneRecordStateListener stateListener;
+    private MicrophoneRecordState state;
 
     @Nullable
     private ByteBuffer byteBuffer;
@@ -50,15 +53,9 @@ public class MicrophoneRecord {
     @Nullable
     private AudioRecordThread audioThread;
 
-    private volatile boolean microphoneMute;
-
-    @Nullable
-    private final SamplesReadyCallback audioSamplesReadyCallback;
-
-    private final boolean isAcousticEchoCancelerSupported;
-    private final boolean isNoiseSuppressorSupported;
-
-    public static boolean activated;// = true;
+    public static boolean activated = true;
+    private boolean microphoneMute = false;
+    private AudioRecordThread.AudioRecordSampleListener listenerAudioRecordSampleListener;
 
     /**
      * Audio thread which keeps calling ByteBuffer.read() waiting for audio
@@ -67,52 +64,41 @@ public class MicrophoneRecord {
      * This thread uses a Process.THREAD_PRIORITY_URGENT_AUDIO priority.
      */
 
+    public MicrophoneRecord(int audioSource,
+                            @NonNull IMicrophoneRecordStateListener stateListener,
+                            @NonNull IMicrophoneInformationProvider informationProvider,
+                            @NonNull AudioRecordThread.AudioRecordSampleListener listenerAudioRecordSampleListener,
+                            @Nullable AudioEffects effects) {
+        this.stateListener = stateListener;
 
-    @CalledByNative
-    WebRtcAudioRecord(Context context, AudioManager audioManager) {
-        this(context, audioManager, DEFAULT_AUDIO_SOURCE, null /* errorCallback */,
-                null /* audioSamplesReadyCallback */, WebRtcAudioEffects.isAcousticEchoCancelerSupported(),
-                WebRtcAudioEffects.isNoiseSuppressorSupported());
-    }
-
-    public WebRtcAudioRecord(Context context, AudioManager audioManager, int audioSource,
-                             @Nullable AudioRecordErrorCallback errorCallback,
-                             @Nullable SamplesReadyCallback audioSamplesReadyCallback,
-                             boolean isAcousticEchoCancelerSupported, boolean isNoiseSuppressorSupported) {
-        if (isAcousticEchoCancelerSupported && !WebRtcAudioEffects.isAcousticEchoCancelerSupported()) {
-            throw new IllegalArgumentException("HW AEC not supported");
-        }
-        if (isNoiseSuppressorSupported && !WebRtcAudioEffects.isNoiseSuppressorSupported()) {
-            throw new IllegalArgumentException("HW NS not supported");
-        }
-        this.context = context;
-        this.audioManager = audioManager;
+        this.listenerAudioRecordSampleListener = listenerAudioRecordSampleListener;
+        this.effects = effects;
+        this.informationProvider = informationProvider;
         this.audioSource = audioSource;
-        this.errorCallback = errorCallback;
-        this.audioSamplesReadyCallback = audioSamplesReadyCallback;
-        this.isAcousticEchoCancelerSupported = isAcousticEchoCancelerSupported;
-        this.isNoiseSuppressorSupported = isNoiseSuppressorSupported;
     }
 
-    @CalledByNative
-    private int initRecording(int sampleRate, int channels) {
+    public int initRecording(int sampleRate, int channels) {
+        setState(MicrophoneRecordState.INITIALIZING);
         Logging.d(TAG, "initRecording(sampleRate=" + sampleRate + ", channels=" + channels + ")");
         if (audioRecord != null) {
-            reportWebRtcAudioRecordInitError("InitRecording called twice without StopRecording.");
+            informationProvider.reportInitError("InitRecording called twice without StopRecording.");
+            setState(MicrophoneRecordState.INITIALIZED_FAILED);
             return -1;
         }
         final int bytesPerFrame = channels * (BITS_PER_SAMPLE / 8);
         final int framesPerBuffer = sampleRate / BUFFERS_PER_SECOND;
         byteBuffer = ByteBuffer.allocateDirect(bytesPerFrame * framesPerBuffer);
         if (!(byteBuffer.hasArray())) {
-            reportWebRtcAudioRecordInitError("ByteBuffer does not have backing array.");
+            informationProvider.reportInitError("ByteBuffer does not have backing array.");
+            setState(MicrophoneRecordState.INITIALIZED_FAILED);
             return -1;
         }
+
         Logging.d(TAG, "byteBuffer.capacity: " + byteBuffer.capacity());
         // Rather than passing the ByteBuffer with every callback (requiring
         // the potentially expensive GetDirectBufferAddress) we simply have the
         // the native class cache the address to the memory once.
-        nativeCacheDirectBufferAddress(nativeAudioRecord, byteBuffer);
+        informationProvider.nativeBufferAddress(byteBuffer);
 
         // Get the minimum buffer size required for the successful creation of
         // an AudioRecord object, in byte units.
@@ -121,7 +107,8 @@ public class MicrophoneRecord {
         int minBufferSize =
                 AudioRecord.getMinBufferSize(sampleRate, channelConfig, AudioFormat.ENCODING_PCM_16BIT);
         if (minBufferSize == AudioRecord.ERROR || minBufferSize == AudioRecord.ERROR_BAD_VALUE) {
-            reportWebRtcAudioRecordInitError("AudioRecord.getMinBufferSize failed: " + minBufferSize);
+            informationProvider.reportInitError("AudioRecord.getMinBufferSize failed: " + minBufferSize);
+            setState(MicrophoneRecordState.INITIALIZED_FAILED);
             return -1;
         }
         Logging.d(TAG, "AudioRecord.getMinBufferSize: " + minBufferSize);
@@ -134,6 +121,7 @@ public class MicrophoneRecord {
 
         if (!activated) {
             //bypass the current state to make sure the micro is being deactivated
+            setState(MicrophoneRecordState.INITIALIZED);
             return framesPerBuffer;
         }
 
@@ -141,29 +129,43 @@ public class MicrophoneRecord {
             audioRecord = new AudioRecord(audioSource, sampleRate, channelConfig,
                     AudioFormat.ENCODING_PCM_16BIT, bufferSizeInBytes);
         } catch (IllegalArgumentException e) {
-            reportWebRtcAudioRecordInitError("AudioRecord ctor error: " + e.getMessage());
+            informationProvider.reportInitError("AudioRecord ctor error: " + e.getMessage());
             releaseAudioResources();
+            setState(MicrophoneRecordState.INITIALIZED_FAILED);
             return -1;
         }
         if (audioRecord == null || audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
-            reportWebRtcAudioRecordInitError("Failed to create a new AudioRecord instance");
+            informationProvider.reportInitError("Failed to create a new AudioRecord instance");
             releaseAudioResources();
+            setState(MicrophoneRecordState.INITIALIZED_FAILED);
             return -1;
         }
 
-        effects.enable(audioRecord.getAudioSessionId());
+        if (effects != null) {
+            effects.enable(audioRecord.getAudioSessionId());
+        }
         logMainParameters();
         logMainParametersExtended();
+        setState(MicrophoneRecordState.INITIALIZED);
         return framesPerBuffer;
     }
 
-    @CalledByNative
-    private boolean startRecording() {
+    public boolean startRecording() {
+        setState(MicrophoneRecordState.STARTING);
         Logging.d(TAG, "startRecording");
+        if (null == byteBuffer) {
+            setState(MicrophoneRecordState.STARTED_ERROR);
+            setState(MicrophoneRecordState.STOPPED);
+            return false;
+        }
 
         if (!activated) {
             //if the mic is deactivated completely, we start but it will be empty
-            audioThread = new AudioRecordThread("AudioRecordDeactivatedJavaThread", false);
+            audioThread = new AudioRecordThread("AudioRecordDeactivatedJavaThread", false,
+                    audioRecord,
+                    listenerAudioRecordSampleListener,
+                    byteBuffer);
+            audioThread.activate(microphoneMute);
             audioThread.start();
             return true;
         }
@@ -171,47 +173,69 @@ public class MicrophoneRecord {
         assertTrue(audioRecord != null);
         assertTrue(audioThread == null);
         try {
+            Log.d(TAG, "startRecording !");
             audioRecord.startRecording();
         } catch (IllegalStateException e) {
-            reportWebRtcAudioRecordStartError(AudioRecordStartErrorCode.AUDIO_RECORD_START_EXCEPTION,
+            informationProvider.reportStartError(AudioRecordStartErrorCode.AUDIO_RECORD_START_EXCEPTION,
                     "AudioRecord.startRecording failed: " + e.getMessage());
+            setState(MicrophoneRecordState.STARTED_ERROR);
+            setState(MicrophoneRecordState.STOPPED);
             return false;
         }
         if (audioRecord.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING) {
-            reportWebRtcAudioRecordStartError(AudioRecordStartErrorCode.AUDIO_RECORD_START_STATE_MISMATCH,
+            informationProvider.reportStartError(AudioRecordStartErrorCode.AUDIO_RECORD_START_STATE_MISMATCH,
                     "AudioRecord.startRecording failed - incorrect state :"
                             + audioRecord.getRecordingState());
+            setState(MicrophoneRecordState.STARTED_ERROR);
+            setState(MicrophoneRecordState.STOPPED);
             return false;
         }
-        audioThread = new AudioRecordThread("AudioRecordJavaThread");
+
+        audioThread = new AudioRecordThread("AudioRecordDeactivatedJavaThread", false,
+                audioRecord,
+                listenerAudioRecordSampleListener,
+                byteBuffer);
+
         audioThread.start();
+        setState(MicrophoneRecordState.STARTED);
         return true;
     }
 
-    private boolean stopRecording() {
+    public boolean stopRecording() {
+        setState(MicrophoneRecordState.STOPPING);
         Logging.d(TAG, "stopRecording");
         assertTrue(audioThread != null);
         audioThread.stopThread();
-        if (!ThreadUtils.joinUninterruptibly(audioThread, AUDIO_RECORD_THREAD_JOIN_TIMEOUT_MS)) {
+        Log.d(TAG, "stopRecording: >>>>>>>>>>>>>>>>>>>>>>");
+        Log.d(TAG, "stopRecording: >>>>>>>>>>>>>>>>>>>>>>");
+        Log.d(TAG, "stopRecording: TODO STILL NEED TO JOIN THREAD ON STOP");
+        Log.d(TAG, "stopRecording: <<<<<<<<<<<<<<<<<<<<<<");
+        Log.d(TAG, "stopRecording: <<<<<<<<<<<<<<<<<<<<<<");
+        /*if (!ThreadUtils.joinUninterruptibly(audioThread, AUDIO_RECORD_THREAD_JOIN_TIMEOUT_MS)) {
             Logging.e(TAG, "Join of AudioRecordJavaThread timed out");
-            WebRtcAudioUtils.logAudioState(TAG, context, audioManager);
-        }
+            //WebRtcAudioUtils.logAudioState(TAG, context, audioManager);
+        }*/
         audioThread = null;
-        effects.release();
+        if (effects != null) {
+            effects.release();
+        }
         releaseAudioResources();
+        setState(MicrophoneRecordState.STOPPED);
         return true;
     }
 
-    private void logMainParameters() {
-        Log.d(TAG,
-                "AudioRecord: "
-                        + "session ID: " + audioRecord.getAudioSessionId() + ", "
-                        + "channels: " + audioRecord.getChannelCount() + ", "
-                        + "sample rate: " + audioRecord.getSampleRate());
+    public void logMainParameters() {
+        if (audioRecord != null) {
+            Log.d(TAG,
+                    "AudioRecord: "
+                            + "session ID: " + audioRecord.getAudioSessionId() + ", "
+                            + "channels: " + audioRecord.getChannelCount() + ", "
+                            + "sample rate: " + audioRecord.getSampleRate());
+        }
     }
 
-    private void logMainParametersExtended() {
-        if (Build.VERSION.SDK_INT >= 23) {
+    public void logMainParametersExtended() {
+        if (Build.VERSION.SDK_INT >= 23 && audioRecord != null) {
             Log.d(TAG,
                     "AudioRecord: "
                             // The frame count of the native AudioRecord buffer.
@@ -235,6 +259,9 @@ public class MicrophoneRecord {
     public void setMicrophoneMute(boolean mute) {
         Log.w(TAG, "setMicrophoneMute(" + mute + ")");
         microphoneMute = mute;
+        if (null != audioThread) {
+            audioThread.activate(microphoneMute);
+        }
     }
 
     // Releases the native AudioRecord resources.
@@ -244,5 +271,14 @@ public class MicrophoneRecord {
             audioRecord.release();
             audioRecord = null;
         }
+    }
+
+    public MicrophoneRecordState state() {
+        return state;
+    }
+
+    private void setState(@NonNull MicrophoneRecordState state) {
+        this.state = state;
+        stateListener.onState(state);
     }
 }

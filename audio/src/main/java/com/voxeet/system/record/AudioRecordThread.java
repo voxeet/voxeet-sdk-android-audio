@@ -8,12 +8,15 @@ import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class AudioRecordThread extends Thread {
     private ReentrantLock lock = new ReentrantLock();
     private final static String TAG = AudioRecordThread.class.getSimpleName();
-    private long nativeAudioRecord = 0;
+
+    private CountDownLatch countDownLatch = null;
 
     @Nullable
     private AudioRecord audioRecord;
@@ -27,15 +30,15 @@ public class AudioRecordThread extends Thread {
     private volatile boolean keepAlive = true;
     private boolean activated;
     private byte[] emptyBytes;
+    private boolean started = false;
 
-    public AudioRecordThread(String name) {
+    private AudioRecordThread(String name) {
         super(name);
         this.activated = true;
         this.emptyBytes = new byte[byteBuffer.capacity()];
     }
 
     public AudioRecordThread(String name, boolean activated,
-                             long nativeAudioRecord,
                              @NonNull AudioRecord audioRecord,
                              @NonNull AudioRecordSampleListener listener,
                              @NonNull ByteBuffer byteBuffer) {
@@ -43,20 +46,26 @@ public class AudioRecordThread extends Thread {
 
         Log.d("AudioRecordThread", "AudioRecordThread: creating a specific AudioRecordThread :: " + activated);
         this.activated = activated;
-        this.nativeAudioRecord = nativeAudioRecord;
-        this.audioRecord = audioRecord;
+
+        setAudioRecord(audioRecord);
         this.listener = listener;
         this.byteBuffer = byteBuffer;
     }
 
+    public void activate(boolean activated) {
+        this.activated = activated;
+    }
+
     @Override
     public void run() {
+        started = true;
         Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
         Log.d(TAG, "AudioRecordThread");
         MicrophoneRecord.assertTrue(null != audioRecord && audioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING);
 
         long lastTime = System.nanoTime();
         while (keepAlive && null != listener) {
+            AudioRecordSampleListener listener = this.listener;
             int bytesRead = 0;
 
             //if the mic is activated
@@ -68,6 +77,7 @@ public class AudioRecordThread extends Thread {
                 byteBuffer.clear();
                 byteBuffer.put(emptyBytes);
             }
+            Log.d(TAG, "run: read " + bytesRead);
             unlock();
 
             if (bytesRead == byteBuffer.capacity()) {
@@ -79,28 +89,16 @@ public class AudioRecordThread extends Thread {
                 // failed to join this thread. To be a bit safer, try to avoid calling any native methods
                 // in case they've been unregistered after stopRecording() returned.
                 if (keepAlive) {
-                    listener.onDataRead(nativeAudioRecord, bytesRead);
-                    //nativeDataIsRecorded(nativeAudioRecord, bytesRead);
-                }
-
-                byte[] data = Arrays.copyOfRange(byteBuffer.array(), byteBuffer.arrayOffset(),
-                        byteBuffer.capacity() + byteBuffer.arrayOffset());
-                listener.onData(data);
-
-                /*
-                if (audioSamplesReadyCallback != null) {
-                    // Copy the entire byte buffer array. The start of the byteBuffer is not necessarily
-                    // at index 0.
+                    listener.onDataRead(bytesRead);
                     byte[] data = Arrays.copyOfRange(byteBuffer.array(), byteBuffer.arrayOffset(),
                             byteBuffer.capacity() + byteBuffer.arrayOffset());
-                    audioSamplesReadyCallback.onWebRtcAudioRecordSamplesReady(
-                            new JavaAudioDeviceModule.AudioSamples(audioRecord.getAudioFormat(),
-                                    audioRecord.getChannelCount(), audioRecord.getSampleRate(), data));
-
+                    listener.onData(data);
                 }
-                */
             } else {
                 String errorMessage = "AudioRecord.read failed: " + bytesRead;
+                if (1 == bytesRead) {
+                    errorMessage += byteBuffer.get(0) + " " + byteBuffer.capacity();
+                }
                 Log.e(TAG, errorMessage);
                 if (bytesRead == AudioRecord.ERROR_INVALID_OPERATION) {
                     keepAlive = false;
@@ -117,13 +115,22 @@ public class AudioRecordThread extends Thread {
         } catch (IllegalStateException e) {
             Log.e(TAG, "AudioRecord.stop failed: " + e.getMessage());
         }
+        started = false;
+        if (null != countDownLatch) {
+            countDownLatch.countDown();
+        }
     }
 
-    public void setAudioRecord(long nativeAudioRecord, @NonNull AudioRecord audioRecord) {
+    public void setAudioRecord(@NonNull AudioRecord audioRecord) {
         lock();
-        this.nativeAudioRecord = nativeAudioRecord;
         this.audioRecord = audioRecord;
         unlock();
+    }
+
+    @Override
+    public synchronized void start() {
+        countDownLatch = new CountDownLatch(1);
+        super.start();
     }
 
     // Stops the inner thread loop and also calls AudioRecord.stop().
@@ -132,13 +139,22 @@ public class AudioRecordThread extends Thread {
         Log.d(TAG, "stopThread");
         keepAlive = false;
         activated = false;
+
+        try {
+            if (null != countDownLatch && started) {
+                countDownLatch.await(MicrophoneRecord.AUDIO_RECORD_THREAD_JOIN_TIMEOUT_MS, TimeUnit.SECONDS);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            countDownLatch = null;
+        }
     }
 
     public static interface AudioRecordSampleListener {
 
         boolean isMicrophoneMuted();
 
-        void onDataRead(long nativeAudioRecord, int read);
+        void onDataRead(int read);
 
         void onData(@NonNull byte[] rawdata);
 

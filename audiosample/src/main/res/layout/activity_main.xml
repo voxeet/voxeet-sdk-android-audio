@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/speaker_on"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="speakerOn"
+        android:text="Speaker on" />
+
+    <Button
+        android:id="@+id/speaker_off"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="speakerOff"
+        android:text="Speaker off" />
+
+    <Button
+        android:id="@+id/internal_call"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="internalCall"
+        android:text="internal call" />
+
+    <Button
+        android:id="@+id/internal_media"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="internalMedia"
+        android:text="internal media" />
+
+</LinearLayout>

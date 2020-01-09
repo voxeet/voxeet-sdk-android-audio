@@ -1,6 +1,6 @@
 package com.voxeet.audio.audio_stack;
 
-import com.voxeet.audio.AudioRoute;
+import com.voxeet.audio.MediaDevice;
 import com.voxeet.audio.AudioStackManager;
 import com.voxeet.audio.VoxeetRunner;
 import com.voxeet.audio.utils.AudioStackManagerUtils;
@@ -28,7 +28,7 @@ public class TestRoutes {
 
     @Test
     public void testAvailableRoutes() {
-        List<AudioRoute> routes = audioStackManager.availableRoutes();
+        List<MediaDevice> routes = audioStackManager.availableRoutes();
 
         int expected_size = 2;
         if (audioStackManager.isBluetoothHeadsetConnected()) expected_size++;
@@ -38,21 +38,21 @@ public class TestRoutes {
 
     @Test
     public void testSpeaker() {
-        List<AudioRoute> routes = audioStackManager.availableRoutes();
-        for (AudioRoute route : routes) {
-            if (AudioRoute.ROUTE_SPEAKER.equals(route)) return;
+        List<MediaDevice> routes = audioStackManager.availableRoutes();
+        for (MediaDevice route : routes) {
+            if (MediaDevice.ROUTE_SPEAKER.equals(route)) return;
         }
         Assert.fail("ROUTE_SPEAKER not found but expected");
     }
 
     @Test
     public void testHeadsetOrPhone() {
-        List<AudioRoute> routes = audioStackManager.availableRoutes();
+        List<MediaDevice> routes = audioStackManager.availableRoutes();
         boolean isWiredHeadsetOn = audioStackManager.isWiredHeadsetOn();
 
-        for (AudioRoute route : routes) {
-            if (isWiredHeadsetOn && AudioRoute.ROUTE_HEADSET.equals(route)) return;
-            else if (!isWiredHeadsetOn && AudioRoute.ROUTE_PHONE.equals(route)) return;
+        for (MediaDevice route : routes) {
+            if (isWiredHeadsetOn && MediaDevice.ROUTE_HEADSET.equals(route)) return;
+            else if (!isWiredHeadsetOn && MediaDevice.ROUTE_PHONE.equals(route)) return;
         }
         if (isWiredHeadsetOn) {
             Assert.fail("ROUTE_HEADSET not found but expected");
@@ -67,9 +67,9 @@ public class TestRoutes {
         when(audioStackManager.isWiredHeadsetOn()).thenReturn(true);
         when(audioStackManager.availableRoutes()).thenCallRealMethod();
 
-        List<AudioRoute> routes = audioStackManager.availableRoutes();
-        for (AudioRoute route : routes) {
-            if (AudioRoute.ROUTE_HEADSET.equals(route)) return;
+        List<MediaDevice> routes = audioStackManager.availableRoutes();
+        for (MediaDevice route : routes) {
+            if (MediaDevice.ROUTE_HEADSET.equals(route)) return;
         }
         Assert.fail("ROUTE_HEADSET not found but expected");
     }
@@ -80,9 +80,9 @@ public class TestRoutes {
         when(audioStackManager.isWiredHeadsetOn()).thenReturn(true);
         when(audioStackManager.availableRoutes()).thenCallRealMethod();
 
-        List<AudioRoute> routes = audioStackManager.availableRoutes();
-        for (AudioRoute route : routes) {
-            if (AudioRoute.ROUTE_PHONE.equals(route)) {
+        List<MediaDevice> routes = audioStackManager.availableRoutes();
+        for (MediaDevice route : routes) {
+            if (MediaDevice.ROUTE_PHONE.equals(route)) {
                 Assert.fail("ROUTE_PHONE found but not expected");
             }
         }
@@ -94,9 +94,9 @@ public class TestRoutes {
         when(audioStackManager.isBluetoothHeadsetConnected()).thenReturn(true);
         when(audioStackManager.availableRoutes()).thenCallRealMethod();
 
-        List<AudioRoute> routes = audioStackManager.availableRoutes();
-        for (AudioRoute route : routes) {
-            if (AudioRoute.ROUTE_BLUETOOTH.equals(route)) return;
+        List<MediaDevice> routes = audioStackManager.availableRoutes();
+        for (MediaDevice route : routes) {
+            if (MediaDevice.ROUTE_BLUETOOTH.equals(route)) return;
         }
         Assert.fail("ROUTE_PHONE found but not expected");
     }
@@ -107,9 +107,9 @@ public class TestRoutes {
         when(audioStackManager.isBluetoothHeadsetConnected()).thenReturn(false);
         when(audioStackManager.availableRoutes()).thenCallRealMethod();
 
-        List<AudioRoute> routes = audioStackManager.availableRoutes();
-        for (AudioRoute route : routes) {
-            if (AudioRoute.ROUTE_BLUETOOTH.equals(route)) {
+        List<MediaDevice> routes = audioStackManager.availableRoutes();
+        for (MediaDevice route : routes) {
+            if (MediaDevice.ROUTE_BLUETOOTH.equals(route)) {
                 Assert.fail("ROUTE_PHONE found but not expected");
             }
         }
