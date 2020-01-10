@@ -14,7 +14,7 @@ import com.voxeet.promise.Promise;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SystemDeviceManager extends AbstractDeviceManager<MediaDevice> {
+public class SystemDeviceManager implements IDeviceManager<MediaDevice> {
 
     private final SpeakerDevice speakerDevice;
     private final NormalDevice normalDevice;
@@ -26,8 +26,6 @@ public class SystemDeviceManager extends AbstractDeviceManager<MediaDevice> {
 
     public SystemDeviceManager(@NonNull SystemAudioManager systemAudioManager,
                                @NonNull IMediaDeviceConnectionState connectionState) {
-        super(connectionState);
-
         this.systemAudioManager = systemAudioManager;
 
         this.speakerDevice = new SpeakerDevice(systemAudioManager.audioManager(),
