@@ -4,28 +4,35 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/speaker_on"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="speakerOn"
-        android:text="Speaker on" />
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/speaker_off"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="speakerOff"
-        android:text="Speaker off" />
+        <Button
+            android:id="@+id/speaker_on"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="speakerOn"
+            android:text="Speaker on" />
 
-    <Button
-        android:id="@+id/internal_call"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="internalCall"
-        android:text="internal call" />
+        <Button
+            android:id="@+id/speaker_off"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="speakerOff"
+            android:text="Speaker off" />
+
+        <Button
+            android:id="@+id/internal_call"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="internalCall"
+            android:text="internal call" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/internal_media"
@@ -34,4 +41,105 @@
         android:onClick="internalMedia"
         android:text="internal media" />
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:text="speaker on ? " />
+
+        <TextView
+            android:id="@+id/speaker_on_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:text="speaker off ? " />
+
+        <TextView
+            android:id="@+id/speaker_off_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:text="internal call ?" />
+
+        <TextView
+            android:id="@+id/internal_call_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:text="internal media ?" />
+
+        <TextView
+            android:id="@+id/internal_media_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:text="Wired Headset ?" />
+
+        <TextView
+            android:id="@+id/wired_headsets_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:text="Control Stream Type :" />
+
+        <TextView
+            android:id="@+id/stream_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 </LinearLayout>
