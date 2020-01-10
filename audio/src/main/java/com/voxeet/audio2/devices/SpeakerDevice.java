@@ -31,6 +31,7 @@ public class SpeakerDevice extends MediaDevice<DeviceType> {
         speakerMode = new SpeakerMode(audioManager, audioFocusManagerCall);
     }
 
+    @NonNull
     @Override
     protected Promise<Boolean> connect() {
         return new Promise<>(solver -> {
@@ -41,6 +42,7 @@ public class SpeakerDevice extends MediaDevice<DeviceType> {
         });
     }
 
+    @NonNull
     @Override
     protected Promise<Boolean> disconnect() {
         return new Promise<>(solver -> {

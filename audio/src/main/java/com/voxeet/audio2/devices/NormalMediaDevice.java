@@ -31,6 +31,7 @@ public class NormalMediaDevice extends MediaDevice<DeviceType> {
         mode = new MediaMode(audioManager, focusManager);
     }
 
+    @NonNull
     @Override
     protected Promise<Boolean> connect() {
         return new Promise<>(solver -> {
@@ -41,6 +42,7 @@ public class NormalMediaDevice extends MediaDevice<DeviceType> {
         });
     }
 
+    @NonNull
     @Override
     protected Promise<Boolean> disconnect() {
         return new Promise<>(solver -> {

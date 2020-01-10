@@ -19,12 +19,12 @@ public class MediaDeviceConnectionWrapper {
     }
 
     @NonNull
-    public Promise<Boolean> connect(@NonNull MediaDevice mediaDevice) {
+    public <TYPE> Promise<Boolean> connect(@NonNull MediaDevice<TYPE> mediaDevice) {
         return mediaDevice.connect();
     }
 
     @NonNull
-    public Promise<Boolean> disconnect(@NonNull MediaDevice mediaDevice) {
+    public <TYPE> Promise<Boolean> disconnect(@NonNull MediaDevice<TYPE> mediaDevice) {
         return mediaDevice.disconnect();
     }
 }
