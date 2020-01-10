@@ -29,17 +29,14 @@ public abstract class MediaDevice<TYPE> {
     protected MediaDevice(@NonNull IMediaDeviceConnectionState mediaDeviceConnectionState,
                           @NonNull DeviceType deviceType,
                           @NonNull String id) {
-        connectionState = ConnectionState.DISCONNECTED;
-        this.mediaDeviceConnectionState = mediaDeviceConnectionState;
-        this.id = id;
-        this.deviceType = deviceType;
-        this.holder = null;
+        this(mediaDeviceConnectionState, deviceType, id, null);
     }
 
     protected MediaDevice(@NonNull IMediaDeviceConnectionState mediaDeviceConnectionState,
                           @NonNull DeviceType deviceType,
                           @NonNull String id,
-                          @NonNull TYPE holder) {
+                          @Nullable TYPE holder) {
+        connectionState = ConnectionState.DISCONNECTED;
         this.mediaDeviceConnectionState = mediaDeviceConnectionState;
         this.id = id;
         this.deviceType = deviceType;
@@ -56,7 +53,7 @@ public abstract class MediaDevice<TYPE> {
         return deviceType;
     }
 
-    protected void setConnectionState(@NonNull ConnectionState connectionState) {
+    void setConnectionState(@NonNull ConnectionState connectionState) {
         Log.d(MediaDevice.class.getSimpleName(), "setConnectionState: " + id() + " " + connectionState);
         this.connectionState = connectionState;
         mediaDeviceConnectionState.onConnectionState(this, connectionState);
@@ -67,8 +64,10 @@ public abstract class MediaDevice<TYPE> {
         return connectionState;
     }
 
+    @NonNull
     protected abstract Promise<Boolean> connect();
 
+    @NonNull
     protected abstract Promise<Boolean> disconnect();
 
 }
