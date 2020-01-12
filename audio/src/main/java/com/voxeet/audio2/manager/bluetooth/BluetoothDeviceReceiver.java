@@ -74,8 +74,12 @@ public class BluetoothDeviceReceiver {
     public void connect(@NonNull Context context) {
         context.registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED));
         context.registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED));
-        context.registerReceiver(receiver, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
+        Intent scoIntent = context.registerReceiver(receiver, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
         context.registerReceiver(receiver, new IntentFilter(BluetoothDeviceReceiver.ACTION_ACTIVE_DEVICE_CHANGED));
+
+        if (null != scoIntent) {
+            receiver.onReceive(context, scoIntent);
+        }
     }
 
     private final __Call<BluetoothAction> callback;
