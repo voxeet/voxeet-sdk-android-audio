@@ -33,11 +33,5 @@ public class DeviceHolder extends RecyclerView.ViewHolder {
         device_id.setText(mediaDevice.id());
         device_connectivity_status.setText(mediaDevice.connectionState().name());
         device_platform_connectivity_status.setText(mediaDevice.platformConnectionState().name());
-
-        if (mediaDevice instanceof BluetoothDevice) {
-
-        } else {
-            connect.setEnabled(false);
-        }
     }
 }
