@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 
 import com.voxeet.audio.utils.Log;
 import com.voxeet.audio2.devices.description.ConnectionState;
+import com.voxeet.audio2.devices.description.ConnectionStatesEvent;
 import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.description.IMediaDeviceConnectionState;
 import com.voxeet.promise.Promise;
@@ -15,7 +16,7 @@ public abstract class MediaDevice<TYPE> {
     protected final String id;
 
     @Nullable
-    protected final TYPE holder;
+    protected TYPE holder;
 
     @NonNull
     private final IMediaDeviceConnectionState mediaDeviceConnectionState;
@@ -25,6 +26,9 @@ public abstract class MediaDevice<TYPE> {
 
     @NonNull
     protected ConnectionState connectionState;
+
+    @NonNull
+    protected ConnectionState platformConnectionState;
 
     protected MediaDevice(@NonNull IMediaDeviceConnectionState mediaDeviceConnectionState,
                           @NonNull DeviceType deviceType,
@@ -37,10 +41,12 @@ public abstract class MediaDevice<TYPE> {
                           @NonNull String id,
                           @Nullable TYPE holder) {
         connectionState = ConnectionState.DISCONNECTED;
+        platformConnectionState = ConnectionState.CONNECTED;
         this.mediaDeviceConnectionState = mediaDeviceConnectionState;
         this.id = id;
         this.deviceType = deviceType;
         this.holder = holder;
+
     }
 
     @NonNull
@@ -56,12 +62,23 @@ public abstract class MediaDevice<TYPE> {
     void setConnectionState(@NonNull ConnectionState connectionState) {
         Log.d(MediaDevice.class.getSimpleName(), "setConnectionState: " + id() + " " + connectionState);
         this.connectionState = connectionState;
-        mediaDeviceConnectionState.onConnectionState(this, connectionState);
+        mediaDeviceConnectionState.onConnectionState(new ConnectionStatesEvent(connectionState, platformConnectionState, this));
+    }
+
+    protected void setPlatformConnectionState(@NonNull ConnectionState platformConnectionState) {
+        Log.d(MediaDevice.class.getSimpleName(), "setPlatformConnectionState: " + id() + " " + connectionState);
+        this.platformConnectionState = platformConnectionState;
+        mediaDeviceConnectionState.onConnectionState(new ConnectionStatesEvent(connectionState, platformConnectionState, this));
     }
 
     @NonNull
     public ConnectionState connectionState() {
         return connectionState;
+    }
+
+    @NonNull
+    public ConnectionState platformConnectionState() {
+        return platformConnectionState;
     }
 
     @NonNull

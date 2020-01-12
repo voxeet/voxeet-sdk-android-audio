@@ -6,17 +6,20 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.voxeet.audio.utils.__Opt;
 import com.voxeet.audio2.AudioDeviceManager;
+import com.voxeet.audio2.devices.BluetoothDevice;
 import com.voxeet.audio2.devices.MediaDeviceHelper;
 import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.MediaDevice;
+import com.voxeet.audiosample.devices.DevicesAdapter;
 import com.voxeet.promise.Promise;
 import com.voxeet.promise.PromiseInOut;
 import com.voxeet.promise.solve.ThenPromise;
@@ -48,7 +51,10 @@ public class MainActivity extends AppCompatActivity {
     private TextView internal_call_state;
     private TextView internal_media_state;
     private TextView wired_headsets_state;
+    private TextView active_bluetooth_device;
+    private RecyclerView devices_list;
     private boolean enabled = false;
+    private DevicesAdapter devicesAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,12 +70,23 @@ public class MainActivity extends AppCompatActivity {
         internal_call_state = findViewById(R.id.internal_call_state);
         internal_media_state = findViewById(R.id.internal_media_state);
         wired_headsets_state = findViewById(R.id.wired_headsets_state);
+        active_bluetooth_device = findViewById(R.id.active_bluetooth_device);
+        devices_list = findViewById(R.id.devices_list);
 
-
+        //set standard layout manager
+        devices_list.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        devicesAdapter = new DevicesAdapter(this::connectDevice);
+        devices_list.setAdapter(devicesAdapter);
         audioDeviceManager = new AudioDeviceManager(this,
                 this::onNewDevices);
 
         stream_type = findViewById(R.id.stream_type);
+    }
+
+    private void connectDevice(@NonNull MediaDevice mediaDevice) {
+        audioDeviceManager.connect(mediaDevice).then(b -> {
+            Log.d(TAG, "direct call done");
+        }).error(Throwable::printStackTrace);
     }
 
     @Override
@@ -204,6 +221,7 @@ public class MainActivity extends AppCompatActivity {
     private void updateCapabilities(@NonNull List<MediaDevice> devices) {
         if (null == known_devices) enabled = true;
         this.known_devices = devices;
+        devicesAdapter.update(__Opt.of(known_devices).or(new ArrayList<>()));
         updateViews();
     }
 
@@ -227,33 +245,36 @@ public class MainActivity extends AppCompatActivity {
             List<MediaDevice> bluetooth = audioDeviceManager.filter(known_devices, DeviceType.BLUETOOTH);
             List<MediaDevice> usb = audioDeviceManager.filter(known_devices, DeviceType.USB);
 
-            speaker_on_state.setText(MediaDeviceHelper.hasConnected(external_speaker) ? "true":"false");
-            speaker_off_state.setText(MediaDeviceHelper.hasConnected(internal_speaker) ? "true":"false");
-            internal_call_state.setText(MediaDeviceHelper.hasConnected(internal_speaker) ? "true":"false");
-            wired_headsets_state.setText(MediaDeviceHelper.hasConnected(wired_headsets) ? "true":"false");
-            internal_media_state.setText(MediaDeviceHelper.hasConnected(normal_media) ? "true":"false");
+            speaker_on_state.setText(MediaDeviceHelper.hasConnected(external_speaker) ? "true" : "false");
+            speaker_off_state.setText(MediaDeviceHelper.hasConnected(internal_speaker) ? "true" : "false");
+            internal_call_state.setText(MediaDeviceHelper.hasConnected(internal_speaker) ? "true" : "false");
+            wired_headsets_state.setText(MediaDeviceHelper.hasConnected(wired_headsets) ? "true" : "false");
+            internal_media_state.setText(MediaDeviceHelper.hasConnected(normal_media) ? "true" : "false");
 
-            if(MediaDeviceHelper.hasConnected(external_speaker)) {
+            BluetoothDevice active = audioDeviceManager.bluetoothHeadsetDeviceManager().active();
+            active_bluetooth_device.setText(__Opt.of(active).then(MediaDevice::id).or(""));
+
+            if (MediaDeviceHelper.hasConnected(external_speaker)) {
                 speaker_on.setEnabled(false);
                 speaker_off.setEnabled(true);
                 internal_call.setEnabled(true);
                 internal_media.setEnabled(true);
-            } else if(MediaDeviceHelper.hasConnected(internal_speaker)) {
+            } else if (MediaDeviceHelper.hasConnected(internal_speaker)) {
                 speaker_on.setEnabled(true);
                 speaker_off.setEnabled(false);
                 internal_call.setEnabled(false);
                 internal_media.setEnabled(true);
-            } else if(MediaDeviceHelper.hasConnected(wired_headsets)) {
+            } else if (MediaDeviceHelper.hasConnected(wired_headsets)) {
                 speaker_on.setEnabled(true);
                 speaker_off.setEnabled(false);
                 internal_call.setEnabled(false);
                 internal_media.setEnabled(true);
-            } else if(MediaDeviceHelper.hasConnected(bluetooth)) {
+            } else if (MediaDeviceHelper.hasConnected(bluetooth)) {
                 speaker_on.setEnabled(true);
                 speaker_off.setEnabled(true);
                 internal_call.setEnabled(true);
                 internal_media.setEnabled(true);
-            } else if(MediaDeviceHelper.hasConnected(usb)) {
+            } else if (MediaDeviceHelper.hasConnected(usb)) {
                 speaker_on.setEnabled(true);
                 speaker_off.setEnabled(true);
                 internal_call.setEnabled(true);
@@ -265,6 +286,8 @@ public class MainActivity extends AppCompatActivity {
                 internal_media.setEnabled(false);
                 internal_media_state.setText("true // force default");
             }
+
+            devicesAdapter.notifyDataSetChanged();
         }
 
         com.voxeet.audio.utils.Log.enable(true);

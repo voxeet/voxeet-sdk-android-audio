@@ -7,6 +7,7 @@ import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.audio.focus.AudioFocusMode;
 import com.voxeet.audio.mode.SpeakerMode;
 import com.voxeet.audio.mode.WiredMode;
+import com.voxeet.audio.utils.__Call;
 import com.voxeet.audio2.devices.description.ConnectionState;
 import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.description.IMediaDeviceConnectionState;
@@ -25,11 +26,13 @@ public class WiredDevice extends MediaDevice<DeviceType> {
             @NonNull AudioManager audioManager,
             @NonNull IMediaDeviceConnectionState connectionState,
             @NonNull DeviceType deviceType,
-            @NonNull String id) {
+            @NonNull String id,
+            @NonNull __Call<PlatformDeviceConnectionWrapper> afterBuild) {
         super(connectionState, deviceType, id);
 
         this.audioManager = audioManager;
         mode = new WiredMode(audioManager, audioFocusManagerCall);
+        afterBuild.apply(connectionState1 -> WiredDevice.this.platformConnectionState = connectionState1);
     }
 
     @NonNull

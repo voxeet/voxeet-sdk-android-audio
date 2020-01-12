@@ -9,7 +9,9 @@ import com.voxeet.audio.utils.__Call;
 import com.voxeet.audio.utils.__Opt;
 import com.voxeet.audio2.devices.MediaDevice;
 import com.voxeet.audio2.devices.description.ConnectionState;
+import com.voxeet.audio2.devices.description.ConnectionStatesEvent;
 import com.voxeet.audio2.devices.description.DeviceType;
+import com.voxeet.audio2.manager.BluetoothHeadsetDeviceManager;
 import com.voxeet.audio2.manager.ConnectScheduler;
 import com.voxeet.audio2.manager.IDeviceManager;
 import com.voxeet.audio2.manager.SystemDeviceManager;
@@ -30,6 +32,7 @@ public final class AudioDeviceManager implements IDeviceManager<MediaDevice> {
     private SystemAudioManager systemAudioManager;
     private SystemDeviceManager systemDeviceManager;
     private WiredHeadsetDeviceManager wiredHeadsetDeviceManager;
+    private BluetoothHeadsetDeviceManager bluetoothHeadsetDeviceManager;
 
     private AudioDeviceManager() {
 
@@ -41,6 +44,7 @@ public final class AudioDeviceManager implements IDeviceManager<MediaDevice> {
         this.update = update;
         systemDeviceManager = new SystemDeviceManager(systemAudioManager, this::onConnectionState);
         wiredHeadsetDeviceManager = new WiredHeadsetDeviceManager(context, systemAudioManager, (r) -> this.sendUpdate(), this::onConnectionState);
+        bluetoothHeadsetDeviceManager = new BluetoothHeadsetDeviceManager(context, this, systemAudioManager, (r) -> this.sendUpdate(), this::onConnectionState);
         connectScheduler = new ConnectScheduler();
     }
 
@@ -54,13 +58,16 @@ public final class AudioDeviceManager implements IDeviceManager<MediaDevice> {
         return systemDeviceManager;
     }
 
+    @NonNull
+    public BluetoothHeadsetDeviceManager bluetoothHeadsetDeviceManager() {
+        return bluetoothHeadsetDeviceManager;
+    }
+
     public void dump(@NonNull List<MediaDevice> list) {
         Log.d(TAG, ">>>>>>>>>>>>>>>>>>>>>>>>>>>");
         Log.d(TAG, "enumeraDevices");
         for (MediaDevice device : list) {
-            Log.d(TAG, "> > > > > > > > > > > > > >");
             Log.d(TAG, "device " + device.id() + " " + device.connectionState());
-            Log.d(TAG, "< < < < < < < < < < < < < <");
         }
         Log.d(TAG, "<<<<<<<<<<<<<<<<<<<<<<<<<<<");
     }
@@ -68,9 +75,16 @@ public final class AudioDeviceManager implements IDeviceManager<MediaDevice> {
     @NonNull
     @Override
     public Promise<List<MediaDevice>> enumerateDevices() {
+        return enumerateTypedDevices();
+    }
+
+    @NonNull
+    @Override
+    public Promise<List<MediaDevice>> enumerateTypedDevices() {
         return new Promise<>((resolve, reject) -> Promise.all(
                 systemDeviceManager.enumerateDevices(),
-                wiredHeadsetDeviceManager.enumerateDevices()
+                wiredHeadsetDeviceManager.enumerateDevices(),
+                bluetoothHeadsetDeviceManager.enumerateDevices()
         ).then((result, solver) -> {
             List<MediaDevice> list = new ArrayList<>();
             for (List<MediaDevice> mediaDevices : __Opt.of(result).or(new ArrayList<>())) {
@@ -81,6 +95,11 @@ public final class AudioDeviceManager implements IDeviceManager<MediaDevice> {
 
             resolve.call(list);
         }).error(reject::call));
+    }
+
+    @Override
+    public boolean isWorking() {
+        return true;
     }
 
     @NonNull
@@ -131,14 +150,8 @@ public final class AudioDeviceManager implements IDeviceManager<MediaDevice> {
         });
     }
 
-    private void onConnectionState(@NonNull MediaDevice mediaDevice,
-                                   @NonNull ConnectionState connectionState) {
-        switch (connectionState) {
-            case DISCONNECTED:
-            case DISCONNECTING:
-            case CONNECTING:
-            case CONNECTED:
-        }
+    private void onConnectionState(@NonNull ConnectionStatesEvent holder) {
+        sendUpdate();
     }
 
     public boolean isWiredConnected() {

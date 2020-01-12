@@ -18,4 +18,9 @@ public class Log {
         if (!enable) return;
         android.util.Log.e("AudioSDK", tag + " :: " + s);
     }
+
+    public static void e(String tag, String s, Throwable e) {
+        if (!enable) return;
+        android.util.Log.e("AudioSDK", tag + " :: " + s, e);
+    }
 }

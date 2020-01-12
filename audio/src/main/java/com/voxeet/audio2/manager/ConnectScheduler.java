@@ -17,9 +17,9 @@ public class ConnectScheduler {
     @NonNull
     private final MediaDeviceConnectionWrapper connectionWrapper;
     private List<IOHolder> mediaDevices = new ArrayList<>();
-    private IOHolder currenting;
 
     private IOHolder current = null;
+    private boolean locked = false;
 
     public ConnectScheduler() {
         connectionWrapper = MediaDeviceConnectionWrapper.unique();
@@ -47,38 +47,40 @@ public class ConnectScheduler {
     }
 
     private void tryIO() {
-        Log.d(TAG, "tryIO: currenting:=" + currenting + " mediaDevices:=" + mediaDevices.size());
-        if (null == currenting && mediaDevices.size() > 0) {
+        if (!locked && mediaDevices.size() > 0) {
+            locked = true;
             IOHolder holder = mediaDevices.get(0);
             mediaDevices.remove(0);
-            currenting = holder;
+            Log.d(TAG, "STARTING --> " + holder.mediaDevice.id());
 
             Promise<Boolean> promise;
             if (holder.connect) promise = connectionWrapper.connect(holder.mediaDevice);
             else promise = connectionWrapper.disconnect(holder.mediaDevice);
 
-            final Solver<Boolean> solver = currenting.solver;
+            final Solver<Boolean> solver = holder.solver;
+
+            if (holder.connect) {
+                current = holder;
+            } else if (null != current && holder.id().equals(current.id())) {
+                current = null;
+            }
 
             promise.then(result -> {
-                Log.d(TAG, "ConnectSchedumer // tryIO: " + result);
-                if (holder.connect) {
-                    Log.d(TAG, "ConnectSchedumer // tryIO: setting the current device connected");
-                    current = holder;
-                } else if (null != current && holder.id().equals(current.id())) {
-                    Log.d(TAG, "ConnectSchedumer // tryIO: removing the current device connected");
-                    current = null;
-                }
                 if (solver != null) {
                     solver.resolve(result);
                 }
-                currenting = null;
+
+                Log.d(TAG, "done for " + holder.mediaDevice.id() + " " + holder.mediaDevice.connectionState());
+                locked = false;
                 tryIO();
             }).error(error -> {
                 if (solver != null) {
                     solver.reject(error);
                 }
                 error.printStackTrace();
-                currenting = null;
+
+                Log.d(TAG, "done for " + holder.mediaDevice.id() + " " + holder.mediaDevice.connectionState());
+                locked = false;
                 tryIO();
             });
         }

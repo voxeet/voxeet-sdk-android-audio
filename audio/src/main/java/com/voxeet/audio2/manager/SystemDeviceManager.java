@@ -50,6 +50,17 @@ public class SystemDeviceManager implements IDeviceManager<MediaDevice> {
     @NonNull
     @Override
     public Promise<List<MediaDevice>> enumerateDevices() {
+        return enumerateTypedDevices();
+    }
+
+    @NonNull
+    @Override
+    public Promise<List<MediaDevice>> enumerateTypedDevices() {
         return Promise.resolve(list);
+    }
+
+    @Override
+    public boolean isWorking() {
+        return true;
     }
 }
