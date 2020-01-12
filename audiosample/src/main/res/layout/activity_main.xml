@@ -12,40 +12,6 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/speaker_on"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="speakerOn"
-            android:text="Speaker on" />
-
-        <Button
-            android:id="@+id/speaker_off"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="speakerOff"
-            android:text="Speaker off" />
-
-        <Button
-            android:id="@+id/internal_call"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="internalCall"
-            android:text="internal call" />
-    </LinearLayout>
-
-    <Button
-        android:id="@+id/internal_media"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="internalMedia"
-        android:text="internal media" />
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

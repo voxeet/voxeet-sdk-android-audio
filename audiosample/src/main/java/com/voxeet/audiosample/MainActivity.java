@@ -42,10 +42,7 @@ public class MainActivity extends AppCompatActivity {
     };
     private List<MediaDevice> known_devices;
     private boolean isResumed = false;
-    private View speaker_on;
-    private View speaker_off;
-    private View internal_call;
-    private View internal_media;
+
     private TextView speaker_on_state;
     private TextView speaker_off_state;
     private TextView internal_call_state;
@@ -61,10 +58,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        speaker_on = findViewById(R.id.speaker_on);
-        speaker_off = findViewById(R.id.speaker_off);
-        internal_call = findViewById(R.id.internal_call);
-        internal_media = findViewById(R.id.internal_media);
         speaker_on_state = findViewById(R.id.speaker_on_state);
         speaker_off_state = findViewById(R.id.speaker_off_state);
         internal_call_state = findViewById(R.id.internal_call_state);
@@ -226,69 +219,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateViews() {
-        if (!enabled) {
-            speaker_on.setEnabled(false);
-            speaker_off.setEnabled(false);
-            internal_call.setEnabled(false);
-            internal_media.setEnabled(false);
-        } else {
-            speaker_on.setEnabled(true);
-            speaker_off.setEnabled(true);
-            internal_call.setEnabled(true);
-            internal_media.setEnabled(true);
+        //little scenario here
+        List<MediaDevice> wired_headsets = audioDeviceManager.filter(known_devices, DeviceType.WIRED_HEADSET);
+        List<MediaDevice> external_speaker = audioDeviceManager.filter(known_devices, DeviceType.EXTERNAL_SPEAKER);
+        List<MediaDevice> internal_speaker = audioDeviceManager.filter(known_devices, DeviceType.INTERNAL_SPEAKER);
+        List<MediaDevice> normal_media = audioDeviceManager.filter(known_devices, DeviceType.NORMAL_MEDIA);
+        List<MediaDevice> bluetooth = audioDeviceManager.filter(known_devices, DeviceType.BLUETOOTH);
+        List<MediaDevice> usb = audioDeviceManager.filter(known_devices, DeviceType.USB);
 
-            //little scenario here
-            List<MediaDevice> wired_headsets = audioDeviceManager.filter(known_devices, DeviceType.WIRED_HEADSET);
-            List<MediaDevice> external_speaker = audioDeviceManager.filter(known_devices, DeviceType.EXTERNAL_SPEAKER);
-            List<MediaDevice> internal_speaker = audioDeviceManager.filter(known_devices, DeviceType.INTERNAL_SPEAKER);
-            List<MediaDevice> normal_media = audioDeviceManager.filter(known_devices, DeviceType.NORMAL_MEDIA);
-            List<MediaDevice> bluetooth = audioDeviceManager.filter(known_devices, DeviceType.BLUETOOTH);
-            List<MediaDevice> usb = audioDeviceManager.filter(known_devices, DeviceType.USB);
+        speaker_on_state.setText(MediaDeviceHelper.hasConnected(external_speaker) ? "true" : "false");
+        speaker_off_state.setText(MediaDeviceHelper.hasConnected(internal_speaker) ? "true" : "false");
+        internal_call_state.setText(MediaDeviceHelper.hasConnected(internal_speaker) ? "true" : "false");
+        wired_headsets_state.setText(MediaDeviceHelper.hasConnected(wired_headsets) ? "true" : "false");
+        internal_media_state.setText(MediaDeviceHelper.hasConnected(normal_media) ? "true" : "false");
 
-            speaker_on_state.setText(MediaDeviceHelper.hasConnected(external_speaker) ? "true" : "false");
-            speaker_off_state.setText(MediaDeviceHelper.hasConnected(internal_speaker) ? "true" : "false");
-            internal_call_state.setText(MediaDeviceHelper.hasConnected(internal_speaker) ? "true" : "false");
-            wired_headsets_state.setText(MediaDeviceHelper.hasConnected(wired_headsets) ? "true" : "false");
-            internal_media_state.setText(MediaDeviceHelper.hasConnected(normal_media) ? "true" : "false");
+        BluetoothDevice active = audioDeviceManager.bluetoothHeadsetDeviceManager().active();
+        active_bluetooth_device.setText(__Opt.of(active).then(MediaDevice::id).or(""));
 
-            BluetoothDevice active = audioDeviceManager.bluetoothHeadsetDeviceManager().active();
-            active_bluetooth_device.setText(__Opt.of(active).then(MediaDevice::id).or(""));
-
-            if (MediaDeviceHelper.hasConnected(external_speaker)) {
-                speaker_on.setEnabled(false);
-                speaker_off.setEnabled(true);
-                internal_call.setEnabled(true);
-                internal_media.setEnabled(true);
-            } else if (MediaDeviceHelper.hasConnected(internal_speaker)) {
-                speaker_on.setEnabled(true);
-                speaker_off.setEnabled(false);
-                internal_call.setEnabled(false);
-                internal_media.setEnabled(true);
-            } else if (MediaDeviceHelper.hasConnected(wired_headsets)) {
-                speaker_on.setEnabled(true);
-                speaker_off.setEnabled(false);
-                internal_call.setEnabled(false);
-                internal_media.setEnabled(true);
-            } else if (MediaDeviceHelper.hasConnected(bluetooth)) {
-                speaker_on.setEnabled(true);
-                speaker_off.setEnabled(true);
-                internal_call.setEnabled(true);
-                internal_media.setEnabled(true);
-            } else if (MediaDeviceHelper.hasConnected(usb)) {
-                speaker_on.setEnabled(true);
-                speaker_off.setEnabled(true);
-                internal_call.setEnabled(true);
-                internal_media.setEnabled(true);
-            } else { //normal_media
-                speaker_on.setEnabled(true);
-                speaker_off.setEnabled(true);
-                internal_call.setEnabled(true);
-                internal_media.setEnabled(false);
-                internal_media_state.setText("true // force default");
-            }
-
-            devicesAdapter.notifyDataSetChanged();
-        }
+        devicesAdapter.notifyDataSetChanged();
 
         com.voxeet.audio.utils.Log.enable(true);
         if (null != known_devices) {
