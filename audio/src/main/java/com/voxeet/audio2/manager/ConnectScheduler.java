@@ -12,6 +12,7 @@ import com.voxeet.promise.solve.Solver;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ConnectScheduler {
@@ -29,6 +30,7 @@ public class ConnectScheduler {
     }
 
     public void pushConnect(MediaDevice mediaDevice, Solver<Boolean> solver) {
+        cancelAwaitingConnect();
         checkDisconnectPrevious(mediaDevice);
         mediaDevices.add(new IOHolder(true, mediaDevice, solver));
 
@@ -115,6 +117,19 @@ public class ConnectScheduler {
 
     public boolean isLocked() {
         return locked;
+    }
+
+    private void cancelAwaitingConnect() {
+        int index = 0;
+        while (index < mediaDevices.size()) {
+            IOHolder holder = mediaDevices.get(index);
+            if (holder.connect && null != holder.solver) {
+                Promise.reject(holder.solver, new CancellationException("canceled"));
+                mediaDevices.remove(index);
+            } else {
+                index++;
+            }
+        }
     }
 
     private class IOHolder {
