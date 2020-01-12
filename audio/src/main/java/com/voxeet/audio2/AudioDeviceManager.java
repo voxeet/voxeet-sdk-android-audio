@@ -20,6 +20,8 @@ import com.voxeet.audio2.system.SystemAudioManager;
 import com.voxeet.promise.Promise;
 import com.voxeet.promise.solve.PromiseSolver;
 import com.voxeet.promise.solve.Solver;
+import com.voxeet.promise.solve.ThenPromise;
+import com.voxeet.promise.solve.ThenVoid;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -119,14 +121,26 @@ public final class AudioDeviceManager implements IDeviceManager<MediaDevice> {
         return result;
     }
 
+    public boolean isLockedForConnectivity() {
+        return connectScheduler.isLocked();
+    }
+
     @NonNull
     public Promise<Boolean> connect(@NonNull MediaDevice mediaDevice) {
-        return new Promise<>((solver) -> connectScheduler.pushConnect(mediaDevice, solver));
+        return new Promise<>((solver) -> {
+            connectScheduler.waitFor()
+                    .then((ThenVoid<ConnectScheduler>) connectScheduler -> connectScheduler.pushConnect(mediaDevice, solver))
+                    .error(Throwable::printStackTrace);
+        });
     }
 
     @NonNull
     public Promise<Boolean> disconnect(@NonNull MediaDevice mediaDevice) {
-        return new Promise<>((solver) -> connectScheduler.pushDisconnect(mediaDevice, solver));
+        return new Promise<>((solver) -> {
+            connectScheduler.waitFor()
+                    .then((ThenVoid<ConnectScheduler>) connectScheduler -> connectScheduler.pushDisconnect(mediaDevice, solver))
+                    .error(Throwable::printStackTrace);
+        });
     }
 
     @NonNull

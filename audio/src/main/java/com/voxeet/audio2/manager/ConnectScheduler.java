@@ -7,10 +7,12 @@ import com.voxeet.audio.utils.Log;
 import com.voxeet.audio2.devices.MediaDevice;
 import com.voxeet.audio2.devices.MediaDeviceConnectionWrapper;
 import com.voxeet.promise.Promise;
+import com.voxeet.promise.solve.PromiseSolver;
 import com.voxeet.promise.solve.Solver;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ConnectScheduler {
     private static final String TAG = ConnectScheduler.class.getSimpleName();
@@ -20,6 +22,7 @@ public class ConnectScheduler {
 
     private IOHolder current = null;
     private boolean locked = false;
+    private List<Solver<ConnectScheduler>> waitFors = new CopyOnWriteArrayList<>();
 
     public ConnectScheduler() {
         connectionWrapper = MediaDeviceConnectionWrapper.unique();
@@ -83,13 +86,35 @@ public class ConnectScheduler {
                 locked = false;
                 tryIO();
             });
+        } else if (!locked) {
+            flushWaitFors();
         }
+    }
+
+    private void flushWaitFors() {
+        for (Solver<ConnectScheduler> solver : waitFors) {
+            try {
+                solver.resolve(this);
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
+        waitFors.clear();
     }
 
     @Nullable
     public MediaDevice current() {
         IOHolder holder = current;
         return null != holder ? holder.mediaDevice : null;
+    }
+
+    public Promise<ConnectScheduler> waitFor() {
+        if (!locked) return Promise.resolve(this);
+        return new Promise<>(solver -> waitFors.add(solver));
+    }
+
+    public boolean isLocked() {
+        return locked;
     }
 
     private class IOHolder {
