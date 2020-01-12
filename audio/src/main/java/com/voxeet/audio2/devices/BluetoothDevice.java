@@ -1,6 +1,8 @@
 package com.voxeet.audio2.devices;
 
 import android.media.AudioManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -22,6 +24,7 @@ import com.voxeet.promise.solve.PromiseSolver;
 import com.voxeet.promise.solve.Solver;
 
 public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevice> {
+    private static Handler handler = new Handler(Looper.getMainLooper());
 
     private final __Call<BluetoothDeviceConnectionWrapper> waitForSolver;
     private final __Call<BluetoothDevice> setActive;
@@ -33,6 +36,7 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
 
     @NonNull
     private BluetoothMode mode;
+    private Cancellable runnable;
 
     public BluetoothDevice(
             @NonNull AudioManager audioManager,
@@ -62,20 +66,23 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
             setActive.apply(BluetoothDevice.this);
             setConnectionState(ConnectionState.CONNECTING);
             new Promise<Boolean>(second -> {
-                Log.d(id(), "call for apply connect...");
-                if(!bluetoothHeadsetDeviceManager.isSCOOn()) {
-                    waitForSolver.apply(new BluetoothDeviceConnectionWrapper(second, false));
+                postTimeout(second);
+                Log.d(id(), "call for apply connect... sco:=" + bluetoothHeadsetDeviceManager.isSCOOn());
+                //if (!bluetoothHeadsetDeviceManager.isSCOOn()) {
+                    waitForSolver.apply(new BluetoothDeviceConnectionWrapper(second, true));
                     mode.apply(false);
                     audioManager.setBluetoothScoOn(true);
                     audioManager.startBluetoothSco();
-                } else {
-                    second.resolve(true);
-                }
+                //} else {
+                //    second.resolve(true);
+                //}
             }).then(b -> {
+                cancelRunnable();
                 Log.d(id(), "connect done");
                 setConnectionState(ConnectionState.CONNECTED);
                 solver.resolve(true);
             }).error(err -> {
+                cancelRunnable();
                 Log.d(id(), "connect done with error");
                 setConnectionState(ConnectionState.CONNECTED);
                 solver.resolve(true);
@@ -89,9 +96,10 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
         return new Promise<>(solver -> {
             setConnectionState(ConnectionState.DISCONNECTING);
             new Promise<Boolean>(second -> {
+                postTimeout(second);
                 if (!ConnectionState.DISCONNECTED.equals(platformConnectionState)) {
-                    Log.d(id(), "call for apply disconnect...");
-                    if(bluetoothHeadsetDeviceManager.isSCOOn()) {
+                    Log.d(id(), "call for apply disconnect... sco:=" + bluetoothHeadsetDeviceManager.isSCOOn());
+                    if (bluetoothHeadsetDeviceManager.isSCOOn()) {
                         waitForSolver.apply(new BluetoothDeviceConnectionWrapper(second, false));
                         audioManager.setBluetoothScoOn(false);
                         audioManager.stopBluetoothSco();
@@ -102,18 +110,36 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
                     second.resolve(true);
                 }
             }).then(b -> {
+                cancelRunnable();
                 Log.d(id(), "disconnect done");
                 mode.abandonAudioFocus();
                 setConnectionState(ConnectionState.DISCONNECTED);
                 solver.resolve(true);
                 onDisconnected.apply(BluetoothDevice.this);
             }).error(err -> {
+                cancelRunnable();
                 Log.d(id(), "disconnect done with error");
                 mode.abandonAudioFocus();
                 setConnectionState(ConnectionState.DISCONNECTED);
                 solver.resolve(true);
             });
         });
+    }
+
+    private void cancelRunnable() {
+        if (null != runnable) {
+            runnable.cancel = true;
+            handler.removeCallbacks(runnable);
+            runnable = null;
+        }
+    }
+
+    private void postTimeout(Solver<Boolean> second) {
+        runnable = new Cancellable(() -> {
+            Log.d(id(), "oops.... timedout /o\\");
+            second.resolve(false);
+        });
+        handler.postDelayed(runnable, 5 * 1000);
     }
 
     public boolean isConnected() {
@@ -127,4 +153,19 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
     public android.bluetooth.BluetoothDevice bluetoothDevice() {
         return holder;
     }
+
+    private class Cancellable implements Runnable {
+        public boolean cancel = false;
+        private Runnable run;
+
+        public Cancellable(Runnable run) {
+            this.run = run;
+        }
+
+        @Override
+        public void run() {
+            if (!cancel) run.run();
+        }
+    }
+
 }
