@@ -23,6 +23,7 @@ import com.voxeet.audio2.manager.bluetooth.BluetoothDeviceReceiver;
 import com.voxeet.audio2.manager.bluetooth.BluetoothHeadsetServiceListener;
 import com.voxeet.audio2.system.SystemAudioManager;
 import com.voxeet.promise.Promise;
+import com.voxeet.promise.solve.ThenPromise;
 import com.voxeet.promise.solve.ThenVoid;
 
 import java.util.ArrayList;
@@ -202,8 +203,15 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
                 case DEVICE_DISCONNECTED:
                     wrapper.setPlatformConnectionState(ConnectionState.DISCONNECTED);
                     if (null != device) {
-                        audioDeviceManager.disconnect(device)
+                        audioDeviceManager.current()
+                                .then((ThenPromise<MediaDevice, Boolean>) mediaDevice -> {
+                                    if (null == mediaDevice) return Promise.resolve(true);
+                                    if (mediaDevice.id().equals(device.id()))
+                                        return audioDeviceManager.disconnect(device);
+                                    return Promise.resolve(true);
+                                })
                                 .then(result -> {
+                                    Log.d(TAG, "disconnecting the connect device because it was the main one");
                                 }).error(Throwable::printStackTrace);
                     }
                     break;
