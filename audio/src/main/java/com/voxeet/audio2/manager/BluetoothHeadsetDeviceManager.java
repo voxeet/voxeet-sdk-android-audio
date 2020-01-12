@@ -137,17 +137,12 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
             Log.d(TAG, "the device is being disconnected...");
             Log.d(TAG, "exists ? " + device);
 
-            if (null != waitingCall) {
-
-            }
-
-
             if (null != device) {
                 switch (__Opt.of(device.connectionState()).or(ConnectionState.DISCONNECTED)) {
                     case CONNECTED:
                     case CONNECTING:
                         Log.d(TAG, "oops... we need to stop this !");
-                        audioDeviceManager.disconnect(device);
+                        //audioDeviceManager.disconnect(device);
                         break;
                     case DISCONNECTING:
                     case DISCONNECTED:
