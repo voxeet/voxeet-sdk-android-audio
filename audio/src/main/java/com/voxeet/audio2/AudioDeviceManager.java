@@ -145,23 +145,9 @@ public final class AudioDeviceManager implements IDeviceManager<MediaDevice> {
 
     @NonNull
     public Promise<MediaDevice> current() {
-        return new Promise<>(solver -> {
-            if (!isWiredConnected()) {
-                solver.resolve(connectScheduler.current());
-            } else {
-                wiredHeadsetDeviceManager.enumerateDevices()
-                        .then(devices -> {
-                            for (MediaDevice device : __Opt.of(devices).or(new ArrayList<>())) {
-                                if (DeviceType.WIRED_HEADSET.equals(device.deviceType())) {
-                                    solver.resolve(device);
-                                    return;
-                                }
-                            }
-                            //time exploit possible, resolve current one
-                            solver.resolve(connectScheduler.current());
-                        }).error(solver::reject);
-            }
-        });
+        return new Promise<>(solver -> connectScheduler.waitFor().then(result -> {
+            solver.resolve(connectScheduler.current());
+        }).error(solver::reject));
     }
 
     private void onConnectionState(@NonNull ConnectionStatesEvent holder) {
