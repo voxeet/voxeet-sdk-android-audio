@@ -1,7 +1,3 @@
-//project to get info about audio
-include ':audio', ':audiosample'
-
-//add hello-oboe which is tied to the following license header
 /*
  * Copyright 2017 The Android Open Source Project
  *
@@ -16,7 +12,20 @@ include ':audio', ':audiosample'
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-include ':hello-oboe'
-include ':hello-oboe-audio-device'
+
+#ifndef SIMPLESYNTH_TRACE_H
+#define SIMPLESYNTH_TRACE_H
+
+class Trace {
+
+public:
+  static void beginSection(const char *format, ...);
+  static void endSection();
+  static void initialize();
+
+private:
+  static bool is_tracing_supported_;
+};
+
+#endif //SIMPLESYNTH_TRACE_H

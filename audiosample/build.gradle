@@ -41,4 +41,5 @@ dependencies {
     implementation "com.android.support:recyclerview-v7:${rootProject.ext.supportLibVersion}"
 
     implementation project(":audio")
+    implementation project(":hello-oboe")
 }

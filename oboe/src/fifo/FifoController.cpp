@@ -1,9 +1,5 @@
-//project to get info about audio
-include ':audio', ':audiosample'
-
-//add hello-oboe which is tied to the following license header
 /*
- * Copyright 2017 The Android Open Source Project
+ * Copyright 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +12,24 @@ include ':audio', ':audiosample'
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-include ':hello-oboe'
-include ':hello-oboe-audio-device'
+
+#include <cassert>
+#include <sys/types.h>
+#include "FifoControllerBase.h"
+#include "FifoController.h"
+
+namespace oboe {
+
+FifoController::FifoController(uint32_t numFrames, uint32_t threshold)
+        : FifoControllerBase(numFrames, threshold)
+{
+    setReadCounter(0);
+    setWriteCounter(0);
+}
+
+FifoController::~FifoController() {
+}
+
+} // namespace oboe
+

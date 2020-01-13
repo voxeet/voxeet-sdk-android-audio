@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.sample.oboe.hellooboe.PlaybackEngine;
 import com.voxeet.audio.utils.__Opt;
 import com.voxeet.audio2.AudioDeviceManager;
 import com.voxeet.audio2.devices.BluetoothDevice;
@@ -58,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        PlaybackEngine.create();
+
         speaker_on_state = findViewById(R.id.speaker_on_state);
         speaker_off_state = findViewById(R.id.speaker_off_state);
         internal_call_state = findViewById(R.id.internal_call_state);
@@ -87,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         isResumed = true;
 
+        PlaybackEngine.setToneOn(true);
+
         handler = new Handler();
         handler.post(runnable);
         if (shouldAskPermission()) {
@@ -104,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
+        PlaybackEngine.setToneOn(false);
         isResumed = false;
         handler.removeCallbacks(runnable);
         handler = null;

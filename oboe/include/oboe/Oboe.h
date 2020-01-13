@@ -1,9 +1,5 @@
-//project to get info about audio
-include ':audio', ':audiosample'
-
-//add hello-oboe which is tied to the following license header
 /*
- * Copyright 2017 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +12,18 @@ include ':audio', ':audiosample'
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-include ':hello-oboe'
-include ':hello-oboe-audio-device'
+
+#ifndef OBOE_OBOE_H
+#define OBOE_OBOE_H
+
+#include "oboe/Definitions.h"
+#include "oboe/ResultWithValue.h"
+#include "oboe/LatencyTuner.h"
+#include "oboe/AudioStream.h"
+#include "oboe/AudioStreamBase.h"
+#include "oboe/AudioStreamBuilder.h"
+#include "oboe/Utilities.h"
+#include "oboe/Version.h"
+
+#endif //OBOE_OBOE_H
