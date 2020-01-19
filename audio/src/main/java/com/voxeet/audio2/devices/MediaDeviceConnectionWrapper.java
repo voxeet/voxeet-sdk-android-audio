@@ -2,7 +2,12 @@ package com.voxeet.audio2.devices;
 
 import android.support.annotation.NonNull;
 
+import com.voxeet.audio.utils.Log;
+import com.voxeet.audio2.devices.description.ConnectionState;
 import com.voxeet.promise.Promise;
+import com.voxeet.promise.solve.PromiseSolver;
+import com.voxeet.promise.solve.Solver;
+import com.voxeet.promise.solve.ThenVoid;
 
 public class MediaDeviceConnectionWrapper {
     private static boolean called = false;
@@ -25,6 +30,13 @@ public class MediaDeviceConnectionWrapper {
 
     @NonNull
     public <TYPE> Promise<Boolean> disconnect(@NonNull MediaDevice<TYPE> mediaDevice) {
-        return mediaDevice.disconnect();
+        return new Promise<>(solver -> {
+            if (ConnectionState.DISCONNECTED.equals(mediaDevice.connectionState())) {
+                Log.d(mediaDevice.id(), "device already disconnected...");
+                solver.resolve(true);
+            } else {
+                solver.resolve(mediaDevice.disconnect());
+            }
+        });
     }
 }

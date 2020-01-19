@@ -82,6 +82,15 @@ public class BluetoothDeviceReceiver {
         }
     }
 
+    public boolean isKnownSCO(@NonNull Context context) {
+        Intent intent = context.registerReceiver(null, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
+
+        if (null == intent) return false;
+        int state = intent.getIntExtra(android.media.AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
+        return state == android.media.AudioManager.SCO_AUDIO_STATE_CONNECTED;
+
+    }
+
     private final __Call<BluetoothAction> callback;
 
     public BluetoothDeviceReceiver(@NonNull __Call<BluetoothAction> callback) {

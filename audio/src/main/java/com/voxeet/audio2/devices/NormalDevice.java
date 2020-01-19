@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 
 import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.audio.focus.AudioFocusMode;
+import com.voxeet.audio.mode.MediaMode;
 import com.voxeet.audio.mode.NormalMode;
 import com.voxeet.audio2.devices.description.ConnectionState;
 import com.voxeet.audio2.devices.description.DeviceType;
@@ -16,9 +17,11 @@ public class NormalDevice extends MediaDevice<DeviceType> {
     @NonNull
     private AudioManager audioManager;
     private AudioFocusManager audioFocusManagerCall = new AudioFocusManager(AudioFocusMode.CALL);
+    private AudioFocusManager audioMediaFocusManagerCall = new AudioFocusManager(AudioFocusMode.MEDIA);
 
     @NonNull
     private NormalMode normalMode;
+    private MediaMode mediaMode;
 
     public NormalDevice(
             @NonNull AudioManager audioManager,
@@ -29,6 +32,7 @@ public class NormalDevice extends MediaDevice<DeviceType> {
 
         this.audioManager = audioManager;
         normalMode = new NormalMode(audioManager, audioFocusManagerCall);
+        mediaMode = new MediaMode(audioManager, audioMediaFocusManagerCall);
     }
 
     @NonNull
@@ -46,8 +50,14 @@ public class NormalDevice extends MediaDevice<DeviceType> {
     @Override
     protected Promise<Boolean> disconnect() {
         return new Promise<>(solver -> {
+            if (ConnectionState.DISCONNECTED.equals(connectionState)) {
+                solver.resolve(true);
+                return;
+            }
             setConnectionState(ConnectionState.DISCONNECTING);
-            normalMode.apply(false);
+            //normalMode.apply(false);
+            normalMode.abandonAudioFocus();
+            mediaMode.apply(false);
             setConnectionState(ConnectionState.DISCONNECTED);
             solver.resolve(true);
         });

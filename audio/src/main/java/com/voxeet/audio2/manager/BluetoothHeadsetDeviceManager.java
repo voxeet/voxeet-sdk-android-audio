@@ -275,6 +275,7 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
     }
 
     public boolean isSCOOn() {
+        if (bluetoothDeviceReceiver.isKnownSCO(context)) return true;
         return sco_connected;
     }
 
