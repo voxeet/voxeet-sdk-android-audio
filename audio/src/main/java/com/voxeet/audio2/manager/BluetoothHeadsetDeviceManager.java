@@ -121,11 +121,15 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
         Log.d(TAG, "onNewBluetoothServiceConnectivity :: " + listener.isConnected());
         connectivityUpdate.apply(devices());
         if (listener.isConnected()) {
-            handler = new Handler(Looper.getMainLooper());
-            handler.post(runnable);
+            if(null == handler) {
+                handler = new Handler(Looper.getMainLooper());
+                handler.post(runnable);
+            }
         } else {
-            handler.removeCallbacks(runnable);
-            handler = null;
+            if(null != handler) {
+                handler.removeCallbacks(runnable);
+                handler = null;
+            }
         }
     }
 
