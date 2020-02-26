@@ -4,7 +4,7 @@ import android.util.Log;
 
 public class Logging {
 
-    private static boolean enable = true;
+    private static boolean enable = false;
 
     public void set(boolean enable) {
         Logging.enable = enable;
