@@ -9,6 +9,7 @@ public class AudioFocusManager implements AudioFocusRequest{
     private final AudioFocusRequest audioFocus;
 
     public AudioFocusManager(@NonNull AudioFocusMode mode) {
+        AudioFocusManagerAsync.start();
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             audioFocus = new AudioFocusRequest26(mode);
         } else {

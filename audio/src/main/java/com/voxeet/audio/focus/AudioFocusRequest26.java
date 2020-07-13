@@ -25,7 +25,7 @@ public class AudioFocusRequest26 implements AudioFocusRequest {
         int usage = AudioAttributes.USAGE_VOICE_COMMUNICATION;
         int content = AudioAttributes.CONTENT_TYPE_SPEECH;
         this.mode = mode;
-        switch(mode) {
+        switch (mode) {
             case MEDIA:
                 usage = AudioAttributes.USAGE_MEDIA;
                 content = AudioAttributes.CONTENT_TYPE_MUSIC;
@@ -55,9 +55,14 @@ public class AudioFocusRequest26 implements AudioFocusRequest {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public int requestAudioFocus(@NonNull AudioManager manager, int audioFocusVolumeType) {
-        manager.setMode(AudioFocusMode.CALL.equals(mode) ?
-                AudioManager.MODE_IN_COMMUNICATION :
-                AudioManager.MODE_NORMAL); //MODE_IN_CALL);
+        AudioFocusManagerAsync.post(() -> {
+            manager.setMode(AudioFocusMode.CALL.equals(mode) ?
+                    AudioManager.MODE_IN_COMMUNICATION :
+                    AudioManager.MODE_NORMAL); //MODE_IN_CALL);
+        }, () -> {
+            //TODO use this when the promise version is online
+        });
+
         Log.d("AudioFocusRequest", "requestAudioFocus");
         manager.requestAudioFocus(null,
                 audioFocusVolumeType, //AudioManager.STREAM_VOICE_CALL,
