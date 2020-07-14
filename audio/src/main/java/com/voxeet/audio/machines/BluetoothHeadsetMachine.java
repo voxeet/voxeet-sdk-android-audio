@@ -7,12 +7,12 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import com.voxeet.audio.utils.Log;
 
 import com.voxeet.audio.AudioStackManager;
 import com.voxeet.audio.listeners.IMediaStateListener;
 import com.voxeet.audio.listeners.ListenerHolder;
 import com.voxeet.audio.mode.AbstractMode;
+import com.voxeet.audio.utils.Log;
 import com.voxeet.audio.utils.Validate;
 
 import static android.media.AudioManager.STREAM_MUSIC;

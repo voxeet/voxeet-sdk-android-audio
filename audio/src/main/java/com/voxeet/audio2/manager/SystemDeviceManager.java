@@ -2,12 +2,12 @@ package com.voxeet.audio2.manager;
 
 import android.support.annotation.NonNull;
 
+import com.voxeet.audio2.devices.MediaDevice;
 import com.voxeet.audio2.devices.NormalDevice;
 import com.voxeet.audio2.devices.NormalMediaDevice;
 import com.voxeet.audio2.devices.SpeakerDevice;
 import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.description.IMediaDeviceConnectionState;
-import com.voxeet.audio2.devices.MediaDevice;
 import com.voxeet.audio2.system.SystemAudioManager;
 import com.voxeet.promise.Promise;
 

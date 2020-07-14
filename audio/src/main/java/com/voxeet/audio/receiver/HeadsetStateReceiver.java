@@ -5,12 +5,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import com.voxeet.audio.utils.Log;
 
 import com.voxeet.audio.machines.BluetoothHeadsetMachine;
 import com.voxeet.audio.machines.WiredHeadsetMachine;
 import com.voxeet.audio.machines.WiredInformation;
 import com.voxeet.audio.mode.BluetoothMode;
+import com.voxeet.audio.utils.Log;
 
 
 public class HeadsetStateReceiver extends BroadcastReceiver {

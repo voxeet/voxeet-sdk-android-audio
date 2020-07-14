@@ -10,13 +10,10 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
-import com.voxeet.audio.focus.AudioFocusMode;
-import com.voxeet.audio.mode.MediaMode;
-import com.voxeet.audio.utils.Log;
 import android.view.Window;
 
 import com.voxeet.audio.focus.AudioFocusManager;
+import com.voxeet.audio.focus.AudioFocusMode;
 import com.voxeet.audio.listeners.IAudioRouteListener;
 import com.voxeet.audio.listeners.IMediaStateListener;
 import com.voxeet.audio.listeners.ListenerHolder;
@@ -24,12 +21,14 @@ import com.voxeet.audio.machines.BluetoothHeadsetMachine;
 import com.voxeet.audio.machines.WiredHeadsetMachine;
 import com.voxeet.audio.mode.AbstractMode;
 import com.voxeet.audio.mode.BluetoothMode;
+import com.voxeet.audio.mode.MediaMode;
 import com.voxeet.audio.mode.NormalMode;
 import com.voxeet.audio.mode.SpeakerMode;
 import com.voxeet.audio.mode.WiredMode;
 import com.voxeet.audio.receiver.HeadsetStateReceiver;
 import com.voxeet.audio.utils.Constants;
 import com.voxeet.audio.utils.Invoke;
+import com.voxeet.audio.utils.Log;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -2,13 +2,11 @@ package com.voxeet.audio2;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.voxeet.audio.utils.Log;
 import com.voxeet.audio.utils.__Call;
 import com.voxeet.audio.utils.__Opt;
 import com.voxeet.audio2.devices.MediaDevice;
-import com.voxeet.audio2.devices.description.ConnectionState;
 import com.voxeet.audio2.devices.description.ConnectionStatesEvent;
 import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.manager.BluetoothHeadsetDeviceManager;
@@ -18,9 +16,6 @@ import com.voxeet.audio2.manager.SystemDeviceManager;
 import com.voxeet.audio2.manager.WiredHeadsetDeviceManager;
 import com.voxeet.audio2.system.SystemAudioManager;
 import com.voxeet.promise.Promise;
-import com.voxeet.promise.solve.PromiseSolver;
-import com.voxeet.promise.solve.Solver;
-import com.voxeet.promise.solve.ThenPromise;
 import com.voxeet.promise.solve.ThenVoid;
 
 import java.util.ArrayList;

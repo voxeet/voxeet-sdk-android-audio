@@ -5,9 +5,6 @@ import android.support.annotation.NonNull;
 import com.voxeet.audio.utils.Log;
 import com.voxeet.audio2.devices.description.ConnectionState;
 import com.voxeet.promise.Promise;
-import com.voxeet.promise.solve.PromiseSolver;
-import com.voxeet.promise.solve.Solver;
-import com.voxeet.promise.solve.ThenVoid;
 
 public class MediaDeviceConnectionWrapper {
     private static boolean called = false;

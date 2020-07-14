@@ -7,7 +7,6 @@ import com.voxeet.audio.utils.Log;
 import com.voxeet.audio2.devices.MediaDevice;
 import com.voxeet.audio2.devices.MediaDeviceConnectionWrapper;
 import com.voxeet.promise.Promise;
-import com.voxeet.promise.solve.PromiseSolver;
 import com.voxeet.promise.solve.Solver;
 
 import java.util.ArrayList;

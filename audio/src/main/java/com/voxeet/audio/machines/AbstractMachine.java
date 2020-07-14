@@ -1,11 +1,10 @@
 package com.voxeet.audio.machines;
 
-import com.voxeet.audio.utils.Log;
-
 import com.voxeet.audio.AudioStackManager;
 import com.voxeet.audio.listeners.IMediaStateListener;
 import com.voxeet.audio.listeners.ListenerHolder;
 import com.voxeet.audio.mode.AbstractMode;
+import com.voxeet.audio.utils.Log;
 
 public abstract class AbstractMachine<CONNECT_CLASS> {
     protected  AbstractMode audioMode;

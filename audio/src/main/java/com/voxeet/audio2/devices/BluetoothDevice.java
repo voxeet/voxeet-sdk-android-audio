@@ -4,14 +4,11 @@ import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.audio.focus.AudioFocusMode;
 import com.voxeet.audio.mode.BluetoothMode;
-import com.voxeet.audio.mode.MediaMode;
 import com.voxeet.audio.mode.NormalMode;
-import com.voxeet.audio.mode.WiredMode;
 import com.voxeet.audio.utils.Log;
 import com.voxeet.audio.utils.__Call;
 import com.voxeet.audio2.devices.description.ConnectionState;
@@ -19,8 +16,6 @@ import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.description.IMediaDeviceConnectionState;
 import com.voxeet.audio2.manager.BluetoothHeadsetDeviceManager;
 import com.voxeet.promise.Promise;
-import com.voxeet.promise.solve.PromiseExec;
-import com.voxeet.promise.solve.PromiseSolver;
 import com.voxeet.promise.solve.Solver;
 
 public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevice> {

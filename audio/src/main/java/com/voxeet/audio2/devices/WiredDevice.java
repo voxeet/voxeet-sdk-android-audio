@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 
 import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.audio.focus.AudioFocusMode;
-import com.voxeet.audio.mode.SpeakerMode;
 import com.voxeet.audio.mode.WiredMode;
 import com.voxeet.audio.utils.__Call;
 import com.voxeet.audio2.devices.description.ConnectionState;
