@@ -55,13 +55,10 @@ public class AudioFocusRequest26 implements AudioFocusRequest {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public int requestAudioFocus(@NonNull AudioManager manager, int audioFocusVolumeType) {
-        AudioFocusManagerAsync.post(() -> {
-            manager.setMode(AudioFocusMode.CALL.equals(mode) ?
-                    AudioManager.MODE_IN_COMMUNICATION :
-                    AudioManager.MODE_NORMAL); //MODE_IN_CALL);
-        }, () -> {
-            //TODO use this when the promise version is online
-        });
+        AudioFocusManagerAsync.setMode(manager, AudioFocusMode.CALL.equals(mode) ?
+                        AudioManager.MODE_IN_COMMUNICATION :
+                        AudioManager.MODE_NORMAL, //MODE_IN_CALL)
+                "AudioFocusRequest");
 
         Log.d("AudioFocusRequest", "requestAudioFocus");
         manager.requestAudioFocus(null,

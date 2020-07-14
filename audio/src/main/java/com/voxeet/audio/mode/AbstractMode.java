@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 
 import com.voxeet.audio.MediaDevice;
 import com.voxeet.audio.focus.AudioFocusManager;
+import com.voxeet.audio.focus.AudioFocusManagerAsync;
 import com.voxeet.audio.utils.Constants;
 import com.voxeet.audio.utils.Invoke;
 
@@ -36,7 +37,7 @@ public abstract class AbstractMode {
     public abstract boolean isConnected();
 
     public void abandonAudioFocus() {
-        manager.setMode(android.media.AudioManager.MODE_NORMAL);
+        AudioFocusManagerAsync.setMode(manager, android.media.AudioManager.MODE_NORMAL, "AbstractMode");
         audioFocusManger.abandonAudioFocus(manager);
         forceVolumeControlStream(abandonFocus);
     }

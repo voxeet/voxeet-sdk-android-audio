@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 
 import com.voxeet.audio.MediaDevice;
 import com.voxeet.audio.focus.AudioFocusManager;
+import com.voxeet.audio.focus.AudioFocusManagerAsync;
 import com.voxeet.audio.utils.Constants;
 
 import static android.media.AudioManager.MODE_IN_COMMUNICATION;
@@ -18,7 +19,7 @@ public class BluetoothMode extends AbstractMode {
     @Override
     public void apply(boolean speaker_state) {
         manager.setSpeakerphoneOn(false);
-        manager.setMode(MODE_IN_COMMUNICATION);
+        AudioFocusManagerAsync.setMode(manager, MODE_IN_COMMUNICATION, "BluetoothMode");
         //forceVolumeControlStream(Constants.STREAM_BLUETOOTH_SCO | requestFocus);
         requestAudioFocus();
     }

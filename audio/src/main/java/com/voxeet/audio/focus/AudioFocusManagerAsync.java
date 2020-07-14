@@ -1,8 +1,11 @@
 package com.voxeet.audio.focus;
 
+import android.media.AudioManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
+
+import com.voxeet.audio.utils.Log;
 
 public class AudioFocusManagerAsync {
 
@@ -20,12 +23,19 @@ public class AudioFocusManagerAsync {
         }
     }
 
+    public static void setMode(@NonNull AudioManager manager, int mode, @NonNull String tag) {
+        Log.d(tag, "mode starting");
+        post(() -> manager.setMode(mode), () -> {
+            Log.d(tag, "mode set");
+        });
+    }
+
     public static boolean post(@NonNull Runnable runnable, @NonNull Runnable finished) {
         if (null != handler) {
             handler.post(() -> {
                 try {
                     runnable.run();
-                }catch (Throwable e){
+                } catch (Throwable e) {
                     //TODO report error
                 }
 

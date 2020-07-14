@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 
 import com.voxeet.audio.MediaDevice;
 import com.voxeet.audio.focus.AudioFocusManager;
+import com.voxeet.audio.focus.AudioFocusManagerAsync;
 
 import static android.media.AudioManager.MODE_CURRENT;
 import static android.media.AudioManager.MODE_IN_COMMUNICATION;
@@ -37,7 +38,7 @@ public class SpeakerMode extends AbstractMode {
     }
 
     void applyNonSamsung(boolean speaker_state) {
-        manager.setMode(MODE_IN_COMMUNICATION);
+        AudioFocusManagerAsync.setMode(manager, MODE_IN_COMMUNICATION, "SpeakerMode");
         manager.setSpeakerphoneOn(speaker_state);
         //forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
         requestAudioFocus();
@@ -47,12 +48,12 @@ public class SpeakerMode extends AbstractMode {
         if (speaker_state) {
             // route audio to back speaker
             manager.setSpeakerphoneOn(true);
-            manager.setMode(MODE_CURRENT);
+            AudioFocusManagerAsync.setMode(manager, MODE_CURRENT, "SpeakerMode");
             //forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
         } else {
             // route audio to earpiece
             manager.setSpeakerphoneOn(speaker_state);
-            manager.setMode(MODE_IN_COMMUNICATION);
+            AudioFocusManagerAsync.setMode(manager, MODE_IN_COMMUNICATION, "SpeakerMode");
             //forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
         }
 
