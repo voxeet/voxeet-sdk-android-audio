@@ -7,6 +7,11 @@ import com.voxeet.audio.MediaDevice;
 import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.audio.focus.AudioFocusManagerAsync;
 import com.voxeet.audio.utils.Constants;
+import com.voxeet.promise.Promise;
+import com.voxeet.promise.solve.PromiseSolver;
+import com.voxeet.promise.solve.Solver;
+import com.voxeet.promise.solve.ThenPromise;
+import com.voxeet.promise.solve.ThenVoid;
 
 import static android.media.AudioManager.MODE_IN_COMMUNICATION;
 
@@ -17,17 +22,30 @@ public class BluetoothMode extends AbstractMode {
     }
 
     @Override
-    public void apply(boolean speaker_state) {
-        manager.setSpeakerphoneOn(false);
-        AudioFocusManagerAsync.setMode(manager, MODE_IN_COMMUNICATION, "BluetoothMode");
-        //forceVolumeControlStream(Constants.STREAM_BLUETOOTH_SCO | requestFocus);
-        requestAudioFocus();
+    public Promise<Boolean> apply(boolean speaker_state) {
+        return new Promise<>(solver -> {
+            manager.setSpeakerphoneOn(false);
+            AudioFocusManagerAsync.setMode(manager, MODE_IN_COMMUNICATION, "BluetoothMode")
+                    .then((ThenPromise<Boolean, Boolean>) aBoolean -> {
+                        //forceVolumeControlStream(Constants.STREAM_BLUETOOTH_SCO | requestFocus);
+                        return requestAudioFocus();
+                    })
+                    .then(o -> {
+                        solver.resolve(true);
+                    }).error(solver::reject);
+        });
     }
 
     @Override
-    public void requestAudioFocus() {
-        forceVolumeControlStream(Constants.STREAM_BLUETOOTH_SCO | requestFocus);
-        audioFocusManger.requestAudioFocus(manager, Constants.STREAM_BLUETOOTH_SCO | requestFocus);
+    public Promise<Boolean> requestAudioFocus() {
+        return new Promise<>(solver -> {
+            forceVolumeControlStream(Constants.STREAM_BLUETOOTH_SCO | requestFocus);
+            audioFocusManger.requestAudioFocus(manager, Constants.STREAM_BLUETOOTH_SCO | requestFocus)
+                    .then(integer -> {
+                        solver.resolve(true);
+                    }).error(solver::reject);
+
+        });
     }
 
     @Override

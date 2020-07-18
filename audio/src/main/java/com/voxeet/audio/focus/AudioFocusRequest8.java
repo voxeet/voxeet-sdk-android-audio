@@ -4,6 +4,9 @@ import android.media.AudioManager;
 import android.support.annotation.NonNull;
 
 import com.voxeet.audio.utils.Log;
+import com.voxeet.promise.Promise;
+import com.voxeet.promise.solve.PromiseSolver;
+import com.voxeet.promise.solve.Solver;
 
 public class AudioFocusRequest8 implements AudioFocusRequest {
 
@@ -13,23 +16,28 @@ public class AudioFocusRequest8 implements AudioFocusRequest {
     public AudioFocusRequest8(AudioFocusMode mode) {
         this.mode = mode;
         Log.d("AudioFocusRequest8", "ctor : this mode does not use the mode " + mode);
-        focusRequest = new AudioManager.OnAudioFocusChangeListener() {
-            @Override
-            public void onAudioFocusChange(int focusChange) {
+        focusRequest = focusChange -> {
 
-            }
         };
     }
 
     @Override
-    public int requestAudioFocus(@NonNull AudioManager manager, int audioFocusVolumeType) {
-        return manager.requestAudioFocus(focusRequest,
-                audioFocusVolumeType, //AudioManager.STREAM_VOICE_CALL,
-                AudioManager.AUDIOFOCUS_GAIN);
+    public Promise<Integer> requestAudioFocus(@NonNull AudioManager manager, int audioFocusVolumeType) {
+        return new Promise<>(solver -> {
+            int result = manager.requestAudioFocus(focusRequest,
+                    audioFocusVolumeType, //AudioManager.STREAM_VOICE_CALL,
+                    AudioManager.AUDIOFOCUS_GAIN);
+
+            solver.resolve(result);
+        });
     }
 
     @Override
-    public int abandonAudioFocus(@NonNull AudioManager manager) {
-        return manager.abandonAudioFocus(focusRequest);
+    public Promise<Integer> abandonAudioFocus(@NonNull AudioManager manager) {
+        return new Promise<>(solver -> {
+            int result = manager.abandonAudioFocus(focusRequest);
+
+            solver.resolve(result);
+        });
     }
 }

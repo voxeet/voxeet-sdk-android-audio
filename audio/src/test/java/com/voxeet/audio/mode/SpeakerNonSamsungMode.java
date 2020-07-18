@@ -1,8 +1,5 @@
 package com.voxeet.audio.mode;
 
-import android.os.Build;
-
-import com.voxeet.audio.AudioStackManager;
 import com.voxeet.audio.utils.Fields;
 
 import org.junit.Assert;

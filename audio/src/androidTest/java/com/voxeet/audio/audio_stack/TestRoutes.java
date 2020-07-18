@@ -1,7 +1,6 @@
 package com.voxeet.audio.audio_stack;
 
 import com.voxeet.audio.MediaDevice;
-import com.voxeet.audio.AudioStackManager;
 import com.voxeet.audio.VoxeetRunner;
 import com.voxeet.audio.utils.AudioStackManagerUtils;
 

@@ -3,15 +3,12 @@ package com.voxeet.audio.mode;
 import android.media.AudioManager;
 import android.os.Build;
 
-import com.voxeet.audio.AudioStackManager;
 import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.audio.VoxeetRunner;
-import com.voxeet.audio.utils.AudioStackManagerUtils;
 import com.voxeet.audio.utils.Fields;
 import com.voxeet.audio.utils.ThreadUtils;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;

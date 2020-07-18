@@ -8,6 +8,12 @@ import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.audio.focus.AudioFocusManagerAsync;
 import com.voxeet.audio.utils.Constants;
 import com.voxeet.audio.utils.Invoke;
+import com.voxeet.promise.Promise;
+import com.voxeet.promise.solve.PromiseSolver;
+import com.voxeet.promise.solve.Solver;
+import com.voxeet.promise.solve.ThenPromise;
+import com.voxeet.promise.solve.ThenValue;
+import com.voxeet.promise.solve.ThenVoid;
 
 public abstract class AbstractMode {
     protected AudioFocusManager audioFocusManger;
@@ -30,16 +36,19 @@ public abstract class AbstractMode {
         this.audioRoute = audioRoute;
     }
 
-    public abstract void apply(boolean speaker_state);
+    public abstract Promise<Boolean> apply(boolean speaker_state);
 
-    public abstract void requestAudioFocus();
+    public abstract Promise<Boolean> requestAudioFocus();
 
     public abstract boolean isConnected();
 
-    public void abandonAudioFocus() {
-        AudioFocusManagerAsync.setMode(manager, android.media.AudioManager.MODE_NORMAL, "AbstractMode");
-        audioFocusManger.abandonAudioFocus(manager);
-        forceVolumeControlStream(abandonFocus);
+    public Promise<Boolean> abandonAudioFocus() {
+        return new Promise<>(solver -> AudioFocusManagerAsync.setMode(manager, AudioManager.MODE_NORMAL, "AbstractMode")
+                .then((ThenPromise<Boolean, Integer>) aBoolean -> audioFocusManger.abandonAudioFocus(manager))
+                .then(integer -> {
+                    forceVolumeControlStream(abandonFocus);
+                    solver.resolve(true);
+                }).error(solver::reject));
     }
 
     protected void forceVolumeControlStream(int volumeMode) {

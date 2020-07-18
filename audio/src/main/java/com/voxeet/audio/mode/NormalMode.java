@@ -5,6 +5,10 @@ import android.support.annotation.NonNull;
 
 import com.voxeet.audio.MediaDevice;
 import com.voxeet.audio.focus.AudioFocusManager;
+import com.voxeet.promise.Promise;
+import com.voxeet.promise.solve.PromiseSolver;
+import com.voxeet.promise.solve.Solver;
+import com.voxeet.promise.solve.ThenVoid;
 
 public class NormalMode extends AbstractMode {
 
@@ -13,15 +17,21 @@ public class NormalMode extends AbstractMode {
     }
 
     @Override
-    public void apply(boolean speaker_state) {
-        manager.setSpeakerphoneOn(false);
-        requestAudioFocus();
+    public Promise<Boolean> apply(boolean speaker_state) {
+        return new Promise<>(solver -> {
+            manager.setSpeakerphoneOn(false);
+            solver.resolve(requestAudioFocus());
+        });
     }
 
     @Override
-    public void requestAudioFocus() {
-        forceVolumeControlStream(requestFocus);
-        audioFocusManger.requestAudioFocus(manager, requestFocus);
+    public Promise<Boolean> requestAudioFocus() {
+        return new Promise<>(solver -> {
+            forceVolumeControlStream(requestFocus);
+            audioFocusManger.requestAudioFocus(manager, requestFocus).then(integer -> {
+                solver.resolve(true);
+            }).error(solver::reject);
+        });
     }
 
     @Override

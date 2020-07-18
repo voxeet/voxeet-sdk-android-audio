@@ -2,7 +2,6 @@ package com.voxeet.audio.mode;
 
 import android.media.AudioManager;
 
-import com.voxeet.audio.AudioStackManager;
 import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.audio.VoxeetRunner;
 import com.voxeet.audio.utils.AudioStackManagerUtils;
@@ -40,7 +39,7 @@ public class SpeakerModeTest {
 
         com.voxeet.audio.mode.SpeakerMode mode = new com.voxeet.audio.mode.SpeakerMode(manager, new AudioFocusManager());
 
-        mode.requestAudioFocus();
+        mode.requestAudioFocus().execute();
 
         ThreadUtils.waitFor(1000);
 

@@ -6,6 +6,9 @@ import android.support.annotation.NonNull;
 import com.voxeet.audio.MediaDevice;
 import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.audio.utils.Constants;
+import com.voxeet.promise.Promise;
+import com.voxeet.promise.solve.PromiseSolver;
+import com.voxeet.promise.solve.Solver;
 
 public class MediaMode extends AbstractMode {
 
@@ -14,16 +17,19 @@ public class MediaMode extends AbstractMode {
     }
 
     @Override
-    public void apply(boolean speaker_state) {
-        requestAudioFocus();
+    public Promise<Boolean> apply(boolean speaker_state) {
+        return requestAudioFocus();
     }
 
     @Override
-    public void requestAudioFocus() {
-        forceVolumeControlStream(Constants.STREAM_MUSIC);
+    public Promise<Boolean> requestAudioFocus() {
+        return new Promise<>(solver -> {
+            forceVolumeControlStream(Constants.STREAM_MUSIC);
+            //commenting this one - requesting audio focus for media with Spotify "pause" the music
+            //audioFocusManger.requestAudioFocus(manager, Constants.STREAM_MUSIC);
 
-        //commenting this one - requesting audio focus for media with Spotify "pause" the music
-        //audioFocusManger.requestAudioFocus(manager, Constants.STREAM_MUSIC);
+            solver.resolve(true);
+        });
     }
 
     @Override

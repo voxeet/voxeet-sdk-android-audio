@@ -120,12 +120,12 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
         Log.d(TAG, "onNewBluetoothServiceConnectivity :: " + listener.isConnected());
         connectivityUpdate.apply(devices());
         if (listener.isConnected()) {
-            if(null == handler) {
+            if (null == handler) {
                 handler = new Handler(Looper.getMainLooper());
                 handler.post(runnable);
             }
         } else {
-            if(null != handler) {
+            if (null != handler) {
                 handler.removeCallbacks(runnable);
                 handler = null;
             }
@@ -160,6 +160,7 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
 
         Set<Map.Entry<String, BluetoothDeviceConnectionWrapper>> set = waitingConnectivity.entrySet();
 
+        Log.d("BluetoothHeadsetdeviceManager", "" + bluetoothAction.action);
         switch (bluetoothAction.action) {
             case SCO_AUDIO_CONNECTED:
                 sco_connected = true;

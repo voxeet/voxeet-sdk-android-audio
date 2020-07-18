@@ -1,6 +1,5 @@
 package com.voxeet.audio.mode;
 
-import com.voxeet.audio.AudioStackManager;
 import com.voxeet.audio.VoxeetRunner;
 import com.voxeet.audio.utils.AudioStackManagerUtils;
 import com.voxeet.audio.utils.CheckFields;

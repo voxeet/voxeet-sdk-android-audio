@@ -7,6 +7,11 @@ import com.voxeet.audio.MediaDevice;
 import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.audio.focus.AudioFocusManagerAsync;
 import com.voxeet.audio2.devices.MediaDeviceHelper;
+import com.voxeet.promise.Promise;
+import com.voxeet.promise.solve.PromiseSolver;
+import com.voxeet.promise.solve.Solver;
+import com.voxeet.promise.solve.ThenPromise;
+import com.voxeet.promise.solve.ThenVoid;
 
 import static android.media.AudioManager.MODE_IN_COMMUNICATION;
 
@@ -17,18 +22,27 @@ public class WiredMode extends AbstractMode {
     }
 
     @Override
-    public void apply(boolean speaker_state) {
-        manager.setSpeakerphoneOn(false);
-        AudioFocusManagerAsync.setMode(manager, MODE_IN_COMMUNICATION, "WiredMode");
-        //forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
-
-        requestAudioFocus();
+    public Promise<Boolean> apply(boolean speaker_state) {
+        return new Promise<>(solver -> {
+            manager.setSpeakerphoneOn(false);
+            //forceVolumeControlStream(Constants.STREAM_VOICE_CALL);
+            AudioFocusManagerAsync.setMode(manager, MODE_IN_COMMUNICATION, "WiredMode")
+                    .then((ThenPromise<Boolean, Boolean>) aBoolean -> requestAudioFocus())
+                    .then(o -> {
+                        solver.resolve(true);
+                    })
+                    .error(solver::reject);
+        });
     }
 
     @Override
-    public void requestAudioFocus() {
-        forceVolumeControlStream(requestFocus);
-        audioFocusManger.requestAudioFocus(manager, requestFocus);
+    public Promise<Boolean> requestAudioFocus() {
+        return new Promise<>(solver -> {
+            forceVolumeControlStream(requestFocus);
+            audioFocusManger.requestAudioFocus(manager, requestFocus).then(integer -> {
+                solver.resolve(true);
+            }).error(solver::reject);
+        });
     }
 
     @Override

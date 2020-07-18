@@ -10,6 +10,8 @@ import com.voxeet.audio2.devices.description.ConnectionState;
 import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.description.IMediaDeviceConnectionState;
 import com.voxeet.promise.Promise;
+import com.voxeet.promise.solve.ErrorPromise;
+import com.voxeet.promise.solve.ThenVoid;
 
 public class NormalMediaDevice extends MediaDevice<DeviceType> {
 
@@ -36,9 +38,13 @@ public class NormalMediaDevice extends MediaDevice<DeviceType> {
     protected Promise<Boolean> connect() {
         return new Promise<>(solver -> {
             setConnectionState(ConnectionState.CONNECTING);
-            mode.apply(false);
-            setConnectionState(ConnectionState.CONNECTED);
-            solver.resolve(true);
+            mode.apply(false).then(aBoolean -> {
+                setConnectionState(ConnectionState.CONNECTED);
+                solver.resolve(true);
+            }).error(error -> {
+                setConnectionState(ConnectionState.DISCONNECTED);
+                solver.reject(error);
+            });
         });
     }
 
@@ -47,9 +53,13 @@ public class NormalMediaDevice extends MediaDevice<DeviceType> {
     protected Promise<Boolean> disconnect() {
         return new Promise<>(solver -> {
             setConnectionState(ConnectionState.DISCONNECTING);
-            mode.apply(false);
-            setConnectionState(ConnectionState.DISCONNECTED);
-            solver.resolve(true);
+            mode.apply(false).then(aBoolean -> {
+                setConnectionState(ConnectionState.DISCONNECTED);
+                solver.resolve(true);
+            }).error(error -> {
+                setConnectionState(ConnectionState.DISCONNECTED);
+                solver.resolve(false);
+            });
         });
     }
 }

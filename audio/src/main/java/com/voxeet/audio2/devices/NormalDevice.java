@@ -11,6 +11,9 @@ import com.voxeet.audio2.devices.description.ConnectionState;
 import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.description.IMediaDeviceConnectionState;
 import com.voxeet.promise.Promise;
+import com.voxeet.promise.solve.ErrorPromise;
+import com.voxeet.promise.solve.ThenPromise;
+import com.voxeet.promise.solve.ThenVoid;
 
 public class NormalDevice extends MediaDevice<DeviceType> {
 
@@ -40,9 +43,13 @@ public class NormalDevice extends MediaDevice<DeviceType> {
     protected Promise<Boolean> connect() {
         return new Promise<>(solver -> {
             setConnectionState(ConnectionState.CONNECTING);
-            normalMode.apply(false);
-            setConnectionState(ConnectionState.CONNECTED);
-            solver.resolve(true);
+            normalMode.apply(false).then(aBoolean -> {
+                setConnectionState(ConnectionState.CONNECTED);
+                solver.resolve(true);
+            }).error(error -> {
+                setConnectionState(ConnectionState.DISCONNECTED);
+                solver.reject(error);
+            });
         });
     }
 
@@ -56,10 +63,10 @@ public class NormalDevice extends MediaDevice<DeviceType> {
             }
             setConnectionState(ConnectionState.DISCONNECTING);
             //normalMode.apply(false);
-            normalMode.abandonAudioFocus();
-            mediaMode.apply(false);
-            setConnectionState(ConnectionState.DISCONNECTED);
-            solver.resolve(true);
+            normalMode.abandonAudioFocus().then((ThenPromise<Boolean, Boolean>) aBoolean -> mediaMode.apply(false)).then(o -> {
+                setConnectionState(ConnectionState.DISCONNECTED);
+                solver.resolve(true);
+            }).error(solver::reject);
         });
     }
 

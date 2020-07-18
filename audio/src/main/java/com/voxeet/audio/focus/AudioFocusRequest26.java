@@ -8,6 +8,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 
 import com.voxeet.audio.utils.Log;
+import com.voxeet.promise.Promise;
+import com.voxeet.promise.solve.PromiseSolver;
+import com.voxeet.promise.solve.Solver;
+import com.voxeet.promise.solve.ThenVoid;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class AudioFocusRequest26 implements AudioFocusRequest {
@@ -37,12 +41,7 @@ public class AudioFocusRequest26 implements AudioFocusRequest {
                 .setContentType(content)
                 .build();
 
-        focusRequest = new AudioManager.OnAudioFocusChangeListener() {
-            @Override
-            public void onAudioFocusChange(int focusChange) {
-                Log.d("AudioFocusRequest", "onAudioFocusChange: " + focusChange);
-            }
-        };
+        focusRequest = focusChange -> Log.d("AudioFocusRequest", "onAudioFocusChange: " + focusChange);
 
         focusRequestBuilt = new android.media.AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
                 .setAudioAttributes(playbackAttributes)
@@ -54,24 +53,29 @@ public class AudioFocusRequest26 implements AudioFocusRequest {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
-    public int requestAudioFocus(@NonNull AudioManager manager, int audioFocusVolumeType) {
-        AudioFocusManagerAsync.setMode(manager, AudioFocusMode.CALL.equals(mode) ?
-                        AudioManager.MODE_IN_COMMUNICATION :
-                        AudioManager.MODE_NORMAL, //MODE_IN_CALL)
-                "AudioFocusRequest");
+    public Promise<Integer> requestAudioFocus(@NonNull AudioManager manager, int audioFocusVolumeType) {
+        return new Promise<>(solver -> {
+            int new_mode = AudioFocusMode.CALL.equals(mode) ?
+                    AudioManager.MODE_IN_COMMUNICATION :
+                    AudioManager.MODE_NORMAL; //MODE_IN_CALL)
+            AudioFocusManagerAsync.setMode(manager, new_mode, "AudioFocusRequest").then(aBoolean -> {
+                Log.d("AudioFocusRequest", "requestAudioFocus");
+                manager.requestAudioFocus(null,
+                        audioFocusVolumeType, //AudioManager.STREAM_VOICE_CALL,
+                        AudioManager.AUDIOFOCUS_GAIN);
 
-        Log.d("AudioFocusRequest", "requestAudioFocus");
-        manager.requestAudioFocus(null,
-                audioFocusVolumeType, //AudioManager.STREAM_VOICE_CALL,
-                AudioManager.AUDIOFOCUS_GAIN);
-
-        return manager.requestAudioFocus(focusRequestBuilt);
+                solver.resolve(manager.requestAudioFocus(focusRequestBuilt));
+            }).error(solver::reject);
+        });
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
-    public int abandonAudioFocus(@NonNull AudioManager manager) {
-        Log.d("AudioFocusRequest", "abandonAudioFocus");
-        return manager.abandonAudioFocusRequest(focusRequestBuilt);
+    public Promise<Integer> abandonAudioFocus(@NonNull AudioManager manager) {
+        return new Promise<>(solver -> {
+            Log.d("AudioFocusRequest", "abandonAudioFocus");
+            int result = manager.abandonAudioFocusRequest(focusRequestBuilt);
+            solver.resolve(result);
+        });
     }
 }

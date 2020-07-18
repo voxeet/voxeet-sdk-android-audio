@@ -1,6 +1,5 @@
 package com.voxeet.audio.mode.speaker;
 
-import com.voxeet.audio.AudioStackManager;
 import com.voxeet.audio.mode.SpeakerMode;
 import com.voxeet.audio.VoxeetRunner;
 import com.voxeet.audio.utils.AudioStackManagerUtils;

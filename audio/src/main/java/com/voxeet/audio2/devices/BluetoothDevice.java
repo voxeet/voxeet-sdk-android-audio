@@ -16,7 +16,10 @@ import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.description.IMediaDeviceConnectionState;
 import com.voxeet.audio2.manager.BluetoothHeadsetDeviceManager;
 import com.voxeet.promise.Promise;
+import com.voxeet.promise.solve.ErrorPromise;
 import com.voxeet.promise.solve.Solver;
+import com.voxeet.promise.solve.ThenPromise;
+import com.voxeet.promise.solve.ThenVoid;
 
 public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevice> {
     private static Handler handler = new Handler(Looper.getMainLooper());
@@ -65,17 +68,23 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
             new Promise<Boolean>(second -> {
                 postTimeout(second);
                 Log.d(id(), "call for apply connect... sco:=" + bluetoothHeadsetDeviceManager.isSCOOn());
-                if (!bluetoothHeadsetDeviceManager.isSCOOn()) {
-                    waitForSolver.apply(new BluetoothDeviceConnectionWrapper(second, true));
-                    mode.apply(false);
-                    normalMode.apply(false);
-                    audioManager.setBluetoothScoOn(true);
-                    audioManager.startBluetoothSco();
-                } else {
-                    Log.d(id(), "sco already started... resolving");
-                    cancelRunnable();
-                    second.resolve(true);
-                }
+                //if (!bluetoothHeadsetDeviceManager.isSCOOn()) {
+                waitForSolver.apply(new BluetoothDeviceConnectionWrapper(second, true));
+                mode.apply(false)
+                        .then((ThenPromise<Boolean, Boolean>) aBoolean -> normalMode.apply(false))
+                        .then(o -> {
+                            Log.d(id(), "set bluetooth sco tto true and start it");
+                            audioManager.setBluetoothScoOn(true);
+                            audioManager.startBluetoothSco();
+                        })
+                        .error(error -> {
+                            //TODO manage ?
+                        });
+                //} else {
+                //    Log.d(id(), "sco already started... resolving");
+                //    cancelRunnable();
+                //    second.resolve(true);
+                //}
             }).then(b -> {
                 cancelRunnable();
                 Log.d(id(), "connect done");
@@ -99,29 +108,37 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
                 postTimeout(second);
                 if (!ConnectionState.DISCONNECTED.equals(platformConnectionState)) {
                     Log.d(id(), "call for apply disconnect... sco:=" + bluetoothHeadsetDeviceManager.isSCOOn());
-                    if (bluetoothHeadsetDeviceManager.isSCOOn()) {
-                        waitForSolver.apply(new BluetoothDeviceConnectionWrapper(second, false));
-                        audioManager.setBluetoothScoOn(false);
-                        audioManager.stopBluetoothSco();
-                    } else {
-                        second.resolve(true);
-                    }
+                    //if (bluetoothHeadsetDeviceManager.isSCOOn()) {
+                    waitForSolver.apply(new BluetoothDeviceConnectionWrapper(second, false));
+                    audioManager.setBluetoothScoOn(false);
+                    audioManager.stopBluetoothSco();
+                    //} else {
+                    //    second.resolve(true);
+                    //}
                 } else {
                     second.resolve(true);
                 }
-            }).then(b -> {
+            }).then((ThenPromise<Boolean, Boolean>) aBoolean -> {
                 cancelRunnable();
                 Log.d(id(), "disconnect done");
-                mode.abandonAudioFocus();
+                return mode.abandonAudioFocus();
+            }).then(b -> {
                 setConnectionState(ConnectionState.DISCONNECTED);
                 solver.resolve(true);
                 onDisconnected.apply(BluetoothDevice.this);
             }).error(err -> {
                 cancelRunnable();
+                final Runnable run = () -> {
+                    setConnectionState(ConnectionState.DISCONNECTED);
+                    solver.resolve(true);
+                };
                 Log.d(id(), "disconnect done with error");
-                mode.abandonAudioFocus();
-                setConnectionState(ConnectionState.DISCONNECTED);
-                solver.resolve(true);
+                mode.abandonAudioFocus().then(aBoolean -> {
+                    run.run();
+                }).error(error -> {
+                    error.printStackTrace();
+                    run.run();
+                });
             });
         });
     }

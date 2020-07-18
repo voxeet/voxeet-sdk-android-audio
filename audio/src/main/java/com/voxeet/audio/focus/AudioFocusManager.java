@@ -5,12 +5,14 @@ import android.media.AudioManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
 
-public class AudioFocusManager implements AudioFocusRequest{
+import com.voxeet.promise.Promise;
+
+public class AudioFocusManager implements AudioFocusRequest {
     private final AudioFocusRequest audioFocus;
 
     public AudioFocusManager(@NonNull AudioFocusMode mode) {
         AudioFocusManagerAsync.start();
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             audioFocus = new AudioFocusRequest26(mode);
         } else {
             audioFocus = new AudioFocusRequest8(mode);
@@ -18,12 +20,12 @@ public class AudioFocusManager implements AudioFocusRequest{
     }
 
     @Override
-    public int requestAudioFocus(@NonNull AudioManager manager, int audioFocusVolumeType) {
+    public Promise<Integer> requestAudioFocus(@NonNull AudioManager manager, int audioFocusVolumeType) {
         return audioFocus.requestAudioFocus(manager, audioFocusVolumeType);
     }
 
     @Override
-    public int abandonAudioFocus(AudioManager service) {
+    public Promise<Integer> abandonAudioFocus(@NonNull AudioManager service) {
         return audioFocus.abandonAudioFocus(service);
     }
 

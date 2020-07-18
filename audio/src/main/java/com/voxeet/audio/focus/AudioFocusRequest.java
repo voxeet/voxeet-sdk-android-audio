@@ -3,10 +3,12 @@ package com.voxeet.audio.focus;
 import android.media.AudioManager;
 import android.support.annotation.NonNull;
 
+import com.voxeet.promise.Promise;
+
 public interface AudioFocusRequest {
 
-    int requestAudioFocus(@NonNull AudioManager manager, int audioFocusVolumeType);
+    Promise<Integer> requestAudioFocus(@NonNull AudioManager manager, int audioFocusVolumeType);
 
-    int abandonAudioFocus(@NonNull AudioManager manager);
+    Promise<Integer> abandonAudioFocus(@NonNull AudioManager manager);
 
 }
