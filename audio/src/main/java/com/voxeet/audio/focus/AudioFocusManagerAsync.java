@@ -13,6 +13,7 @@ public class AudioFocusManagerAsync {
 
     private static HandlerThread FOCUS_MANAGER = new HandlerThread("FOCUS_MANAGER");
     private static Handler handler;
+    private static Handler mainHandler = new Handler(Looper.getMainLooper());
 
     private AudioFocusManagerAsync() {
 
@@ -21,7 +22,7 @@ public class AudioFocusManagerAsync {
     public static void start() {
         if (null == handler) {
             FOCUS_MANAGER.start();
-            handler = new Handler(Looper.getMainLooper());//FOCUS_MANAGER.getLooper());
+            handler = new Handler(FOCUS_MANAGER.getLooper());
         }
     }
 
@@ -30,7 +31,7 @@ public class AudioFocusManagerAsync {
             Log.d(tag, "mode starting");
             post(() -> manager.setMode(mode), () -> {
                 Log.d(tag, "mode set");
-                solver.resolve(true);
+                mainHandler.post(() -> solver.resolve(true));
             });
         });
     }
