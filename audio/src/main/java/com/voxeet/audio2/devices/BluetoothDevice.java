@@ -47,7 +47,7 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
             @NonNull __Call<BluetoothDeviceConnectionWrapper> waitForSolver,
             @NonNull __Call<BluetoothDevice> setActive,
             @NonNull __Call<BluetoothDevice> onDisconnected) {
-        super(connectionState, deviceType, bluetoothDevice.getAddress(), bluetoothDevice);
+        super(connectionState, deviceType, bluetoothDevice.getAddress(), bluetoothDevice, bluetoothDevice.getName());
 
         this.bluetoothHeadsetDeviceManager = bluetoothHeadsetDeviceManager;
         this.setActive = setActive;

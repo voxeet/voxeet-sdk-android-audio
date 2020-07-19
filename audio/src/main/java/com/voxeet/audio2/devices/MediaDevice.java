@@ -16,6 +16,9 @@ public abstract class MediaDevice<TYPE> {
     protected final String id;
 
     @Nullable
+    protected final String name;
+
+    @Nullable
     protected TYPE holder;
 
     @NonNull
@@ -40,10 +43,19 @@ public abstract class MediaDevice<TYPE> {
                           @NonNull DeviceType deviceType,
                           @NonNull String id,
                           @Nullable TYPE holder) {
+        this(mediaDeviceConnectionState, deviceType, id, holder, null);
+    }
+
+    protected MediaDevice(@NonNull IMediaDeviceConnectionState mediaDeviceConnectionState,
+                          @NonNull DeviceType deviceType,
+                          @NonNull String id,
+                          @Nullable TYPE holder,
+                          @Nullable String name) {
         connectionState = ConnectionState.DISCONNECTED;
         platformConnectionState = ConnectionState.CONNECTED;
         this.mediaDeviceConnectionState = mediaDeviceConnectionState;
         this.id = id;
+        this.name = name;
         this.deviceType = deviceType;
         this.holder = holder;
 
@@ -52,6 +64,11 @@ public abstract class MediaDevice<TYPE> {
     @NonNull
     public String id() {
         return id;
+    }
+
+    @NonNull
+    public String name() {
+        return null != name ? name : id();
     }
 
     @NonNull
