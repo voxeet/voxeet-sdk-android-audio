@@ -7,8 +7,6 @@ import com.voxeet.audio.MediaDevice;
 import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.audio.utils.Constants;
 import com.voxeet.promise.Promise;
-import com.voxeet.promise.solve.PromiseSolver;
-import com.voxeet.promise.solve.Solver;
 
 public class MediaMode extends AbstractMode {
 

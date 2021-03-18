@@ -8,10 +8,7 @@ import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.audio.focus.AudioFocusManagerAsync;
 import com.voxeet.audio.utils.Constants;
 import com.voxeet.promise.Promise;
-import com.voxeet.promise.solve.PromiseSolver;
-import com.voxeet.promise.solve.Solver;
 import com.voxeet.promise.solve.ThenPromise;
-import com.voxeet.promise.solve.ThenVoid;
 
 import static android.media.AudioManager.MODE_IN_COMMUNICATION;
 

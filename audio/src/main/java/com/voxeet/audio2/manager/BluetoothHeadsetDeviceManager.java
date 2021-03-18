@@ -20,6 +20,7 @@ import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.description.IMediaDeviceConnectionState;
 import com.voxeet.audio2.manager.bluetooth.BluetoothAction;
 import com.voxeet.audio2.manager.bluetooth.BluetoothDeviceReceiver;
+import com.voxeet.audio2.manager.bluetooth.BluetoothDisconnectListener;
 import com.voxeet.audio2.manager.bluetooth.BluetoothHeadsetServiceListener;
 import com.voxeet.audio2.system.SystemAudioManager;
 import com.voxeet.promise.Promise;
@@ -39,6 +40,10 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
     private final IMediaDeviceConnectionState connectionState;
     private final BluetoothDeviceReceiver bluetoothDeviceReceiver;
     private final Context context;
+
+    @NonNull
+    private final BluetoothDisconnectListener bluetoothDisconnectListener;
+
     private BluetoothDevice active;
     private Runnable runnable;
     private Handler handler;
@@ -85,6 +90,8 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
 
             if (null != handler) handler.postDelayed(runnable, 5000);
         };
+
+        bluetoothDisconnectListener = new BluetoothDisconnectListener(context, this::closeBluetoothDevices);
     }
 
     public boolean canFetchAndSetActiveDevices() {
@@ -298,6 +305,30 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
             BluetoothHeadsetDeviceManager.this.active = matching(list, device);
         } else {
             BluetoothHeadsetDeviceManager.this.active = null;
+        }
+    }
+
+    private void closeBluetoothDevices(@Nullable Boolean /*unused*/ disconnect) {
+        List<BluetoothDevice> devices = devices();
+        for (BluetoothDevice device : devices) {
+            if (null == device) continue;
+
+            boolean need_disconnection = false;
+            switch (device.connectionState()) {
+                case CONNECTED:
+                case CONNECTING:
+                    need_disconnection = true;
+                    break;
+                default:
+            }
+
+            if (need_disconnection) {
+                try {
+                    audioDeviceManager.disconnect(device).execute();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }

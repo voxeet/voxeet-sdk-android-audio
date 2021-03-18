@@ -7,7 +7,7 @@ This Android library helps managing the various event and feature around externa
 ```gradle
 dependencies {
   //add this one if you want to use the logic-only SDK
-  compile ('com.voxeet.sdk:audio:1.0.5') {
+  compile ('com.voxeet.sdk:audio:2.2.0') {
     transitive = true
   }
 }

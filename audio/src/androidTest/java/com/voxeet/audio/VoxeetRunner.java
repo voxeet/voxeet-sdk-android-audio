@@ -1,8 +1,7 @@
 package com.voxeet.audio;
 
 import android.app.Application;
-
-import androidx.test.runner.AndroidJUnitRunner;
+import android.support.test.runner.AndroidJUnitRunner;
 
 public class VoxeetRunner extends AndroidJUnitRunner {
 

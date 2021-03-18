@@ -53,6 +53,11 @@ public class SpecAudioRoute {
     }
 
     @Test
+    public void checkValueMedia() {
+        Assert.assertEquals(MediaDevice.valueOf(4), MediaDevice.ROUTE_MEDIA);
+    }
+
+    @Test
     public void checkValueDefault() {
         int i = Integer.MIN_VALUE;
         while (i < 0) {
@@ -62,7 +67,7 @@ public class SpecAudioRoute {
             i++;
         }
 
-        i = 4;
+        i = 5;
         while (i < Integer.MAX_VALUE) {
             if(!MediaDevice.ROUTE_SPEAKER.equals(MediaDevice.valueOf(i))) {
                 Assert.fail("Excepted speaker but no...");

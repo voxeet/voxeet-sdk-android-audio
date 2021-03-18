@@ -16,10 +16,8 @@ import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.description.IMediaDeviceConnectionState;
 import com.voxeet.audio2.manager.BluetoothHeadsetDeviceManager;
 import com.voxeet.promise.Promise;
-import com.voxeet.promise.solve.ErrorPromise;
 import com.voxeet.promise.solve.Solver;
 import com.voxeet.promise.solve.ThenPromise;
-import com.voxeet.promise.solve.ThenVoid;
 
 public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevice> {
     private static Handler handler = new Handler(Looper.getMainLooper());

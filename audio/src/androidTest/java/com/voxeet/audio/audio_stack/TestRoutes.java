@@ -1,8 +1,9 @@
 package com.voxeet.audio.audio_stack;
 
-import com.voxeet.audio.MediaDevice;
-import com.voxeet.audio.VoxeetRunner;
-import com.voxeet.audio.utils.AudioStackManagerUtils;
+import com.voxeet.audio.utils.TestWithAsyncRun;
+import com.voxeet.audio2.AudioDeviceManager;
+import com.voxeet.audio2.devices.MediaDevice;
+import com.voxeet.audio2.devices.description.DeviceType;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,101 +17,55 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(BlockJUnit4ClassRunner.class)
-public class TestRoutes {
-
-    private AudioStackManager audioStackManager;
+public class TestRoutes extends TestWithAsyncRun {
 
     @Before
     public void init() {
-        audioStackManager = AudioStackManagerUtils.create(VoxeetRunner.app);
+        internalInit();
     }
 
     @Test
     public void testAvailableRoutes() {
-        List<MediaDevice> routes = audioStackManager.availableRoutes();
+        final List<MediaDevice> routes = runWith(audioStackManager.enumerateDevices());
 
         int expected_size = 2;
-        if (audioStackManager.isBluetoothHeadsetConnected()) expected_size++;
 
-        Assert.assertEquals(expected_size, routes.size());
+        Assert.assertTrue(expected_size <= routes.size());
     }
 
     @Test
     public void testSpeaker() {
-        List<MediaDevice> routes = audioStackManager.availableRoutes();
+        final List<MediaDevice> routes = runWith(audioStackManager.enumerateDevices());
         for (MediaDevice route : routes) {
-            if (MediaDevice.ROUTE_SPEAKER.equals(route)) return;
+            if (DeviceType.EXTERNAL_SPEAKER.equals(route.deviceType())) return;
         }
-        Assert.fail("ROUTE_SPEAKER not found but expected");
+        Assert.fail("EXTERNAL_SPEAKER not found but expected");
     }
 
     @Test
     public void testHeadsetOrPhone() {
-        List<MediaDevice> routes = audioStackManager.availableRoutes();
-        boolean isWiredHeadsetOn = audioStackManager.isWiredHeadsetOn();
+        final List<MediaDevice> routes = runWith(audioStackManager.enumerateDevices());
+        boolean isWiredHeadsetOn = audioStackManager.isWiredConnected();
 
         for (MediaDevice route : routes) {
-            if (isWiredHeadsetOn && MediaDevice.ROUTE_HEADSET.equals(route)) return;
-            else if (!isWiredHeadsetOn && MediaDevice.ROUTE_PHONE.equals(route)) return;
+            if (isWiredHeadsetOn && DeviceType.WIRED_HEADSET.equals(route.deviceType())) return;
         }
         if (isWiredHeadsetOn) {
             Assert.fail("ROUTE_HEADSET not found but expected");
-        } else {
-            Assert.fail("ROUTE_PHONE not found but expected");
         }
     }
 
     @Test
     public void testHeadsetValid() {
-        AudioStackManager audioStackManager = mock(AudioStackManager.class);
-        when(audioStackManager.isWiredHeadsetOn()).thenReturn(true);
-        when(audioStackManager.availableRoutes()).thenCallRealMethod();
+        AudioDeviceManager audioStackManager = mock(AudioDeviceManager.class);
+        when(audioStackManager.isWiredConnected()).thenReturn(true);
+        when(audioStackManager.enumerateDevices()).thenCallRealMethod();
 
-        List<MediaDevice> routes = audioStackManager.availableRoutes();
+        final List<MediaDevice> routes = runWith(audioStackManager.enumerateDevices());
+
         for (MediaDevice route : routes) {
-            if (MediaDevice.ROUTE_HEADSET.equals(route)) return;
+            if (DeviceType.WIRED_HEADSET.equals(route.deviceType())) return;
         }
         Assert.fail("ROUTE_HEADSET not found but expected");
-    }
-
-    @Test
-    public void testHeadsetValidWithoutPhone() {
-        AudioStackManager audioStackManager = mock(AudioStackManager.class);
-        when(audioStackManager.isWiredHeadsetOn()).thenReturn(true);
-        when(audioStackManager.availableRoutes()).thenCallRealMethod();
-
-        List<MediaDevice> routes = audioStackManager.availableRoutes();
-        for (MediaDevice route : routes) {
-            if (MediaDevice.ROUTE_PHONE.equals(route)) {
-                Assert.fail("ROUTE_PHONE found but not expected");
-            }
-        }
-    }
-
-    @Test
-    public void testBluetoothhInRouteIfPresent() {
-        AudioStackManager audioStackManager = mock(AudioStackManager.class);
-        when(audioStackManager.isBluetoothHeadsetConnected()).thenReturn(true);
-        when(audioStackManager.availableRoutes()).thenCallRealMethod();
-
-        List<MediaDevice> routes = audioStackManager.availableRoutes();
-        for (MediaDevice route : routes) {
-            if (MediaDevice.ROUTE_BLUETOOTH.equals(route)) return;
-        }
-        Assert.fail("ROUTE_PHONE found but not expected");
-    }
-
-    @Test
-    public void testBluetoothhInRouteIfNotPresent() {
-        AudioStackManager audioStackManager = mock(AudioStackManager.class);
-        when(audioStackManager.isBluetoothHeadsetConnected()).thenReturn(false);
-        when(audioStackManager.availableRoutes()).thenCallRealMethod();
-
-        List<MediaDevice> routes = audioStackManager.availableRoutes();
-        for (MediaDevice route : routes) {
-            if (MediaDevice.ROUTE_BLUETOOTH.equals(route)) {
-                Assert.fail("ROUTE_PHONE found but not expected");
-            }
-        }
     }
 }

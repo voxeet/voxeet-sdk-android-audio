@@ -9,11 +9,7 @@ import com.voxeet.audio.focus.AudioFocusManagerAsync;
 import com.voxeet.audio.utils.Constants;
 import com.voxeet.audio.utils.Invoke;
 import com.voxeet.promise.Promise;
-import com.voxeet.promise.solve.PromiseSolver;
-import com.voxeet.promise.solve.Solver;
 import com.voxeet.promise.solve.ThenPromise;
-import com.voxeet.promise.solve.ThenValue;
-import com.voxeet.promise.solve.ThenVoid;
 
 public abstract class AbstractMode {
     protected AudioFocusManager audioFocusManger;

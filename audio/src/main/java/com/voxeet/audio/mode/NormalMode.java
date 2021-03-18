@@ -6,9 +6,6 @@ import android.support.annotation.NonNull;
 import com.voxeet.audio.MediaDevice;
 import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.promise.Promise;
-import com.voxeet.promise.solve.PromiseSolver;
-import com.voxeet.promise.solve.Solver;
-import com.voxeet.promise.solve.ThenVoid;
 
 public class NormalMode extends AbstractMode {
 

@@ -21,7 +21,7 @@ import com.voxeet.promise.solve.ThenVoid;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class AudioDeviceManager implements IDeviceManager<MediaDevice> {
+public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
 
     private __Call<Promise<List<MediaDevice>>> update;
     private ConnectScheduler connectScheduler;

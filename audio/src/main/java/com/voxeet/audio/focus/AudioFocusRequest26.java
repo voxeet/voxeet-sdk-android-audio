@@ -9,9 +9,6 @@ import android.support.annotation.RequiresApi;
 
 import com.voxeet.audio.utils.Log;
 import com.voxeet.promise.Promise;
-import com.voxeet.promise.solve.PromiseSolver;
-import com.voxeet.promise.solve.Solver;
-import com.voxeet.promise.solve.ThenVoid;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class AudioFocusRequest26 implements AudioFocusRequest {

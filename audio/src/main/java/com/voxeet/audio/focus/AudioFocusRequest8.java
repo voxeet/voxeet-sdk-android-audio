@@ -5,8 +5,6 @@ import android.support.annotation.NonNull;
 
 import com.voxeet.audio.utils.Log;
 import com.voxeet.promise.Promise;
-import com.voxeet.promise.solve.PromiseSolver;
-import com.voxeet.promise.solve.Solver;
 
 public class AudioFocusRequest8 implements AudioFocusRequest {
 
