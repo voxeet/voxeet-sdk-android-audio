@@ -4,11 +4,9 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.0'
+        classpath("com.android.tools.build:gradle:4.1.0")
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
-
-        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.6'
     }
 }
 
@@ -38,13 +36,13 @@ task installAll {
 subprojects {
     task allDeps(type: DependencyReportTask) {}
 }
-
 ext {
-    buildToolsVersion = "28.0.3"
+    buildToolsVersion = "29.0.3"
     minSdkVersion = 16
-    compileSdkVersion = 28
-    targetSdkVersion = 28
+    compileSdkVersion = 29
+    targetSdkVersion = 29
     supportLibVersion = "28.0.0"
+    ndkVersion = "21.4.7075529"
 
     audioSdkVersion = "2.2.0"
 }
