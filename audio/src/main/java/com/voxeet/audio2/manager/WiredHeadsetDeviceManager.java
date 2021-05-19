@@ -78,11 +78,11 @@ public class WiredHeadsetDeviceManager implements IDeviceManager<MediaDevice> {
     }
 
     private void onNewWiredInformation(@NonNull WiredInformation newWiredInformation) {
-        connectivityUpdate.apply(newWiredInformation.isPlugged() ? list : new ArrayList<>());
         if (newWiredInformation.isPlugged()) {
             devicePlatformDeviceConnectionWrapper.setPlatformConnectionState(ConnectionState.CONNECTED);
         } else {
             devicePlatformDeviceConnectionWrapper.setPlatformConnectionState(ConnectionState.DISCONNECTED);
         }
+        connectivityUpdate.apply(newWiredInformation.isPlugged() ? list : new ArrayList<>());
     }
 }

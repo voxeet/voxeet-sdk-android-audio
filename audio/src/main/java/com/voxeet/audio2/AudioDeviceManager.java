@@ -7,6 +7,7 @@ import com.voxeet.audio.utils.Log;
 import com.voxeet.audio.utils.__Call;
 import com.voxeet.audio.utils.__Opt;
 import com.voxeet.audio2.devices.MediaDevice;
+import com.voxeet.audio2.devices.description.ConnectionState;
 import com.voxeet.audio2.devices.description.ConnectionStatesEvent;
 import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.manager.BluetoothHeadsetDeviceManager;
@@ -40,7 +41,7 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
         systemAudioManager = new SystemAudioManager(context);
         this.update = update;
         systemDeviceManager = new SystemDeviceManager(systemAudioManager, this::onConnectionState);
-        wiredHeadsetDeviceManager = new WiredHeadsetDeviceManager(context, systemAudioManager, (r) -> this.sendUpdate(), this::onConnectionState);
+        wiredHeadsetDeviceManager = new WiredHeadsetDeviceManager(context, systemAudioManager, this::onWiredHeadsetDeviceConnected, this::onConnectionState);
         bluetoothHeadsetDeviceManager = new BluetoothHeadsetDeviceManager(context, this, systemAudioManager, (r) -> this.sendUpdate(), this::onConnectionState);
         connectScheduler = new ConnectScheduler();
     }
@@ -138,11 +139,44 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
         });
     }
 
+    /**
+     * Gets the current device which this library is connected to. The device can be null
+     *
+     * @return the promise to resolve
+     */
+    @Deprecated
     @NonNull
     public Promise<MediaDevice> current() {
         return new Promise<>(solver -> connectScheduler.waitFor().then(result -> {
             solver.resolve(connectScheduler.current());
         }).error(solver::reject));
+    }
+
+    /**
+     * Will try to check for headset devices connected. This behavior aligns with https://developer.android.com/guide/topics/media-apps/volume-and-earphones
+     * where it's indicated that wired headset will take precedence over the current route
+     * TODO : check for an event indicating that the route changes ? Not without any "what if?"
+     *
+     * @param mediaDevices the list of media devices which are updated, normally called by the headset manager
+     */
+    private void onWiredHeadsetDeviceConnected(@NonNull List<MediaDevice> mediaDevices) {
+        MediaDevice headset = null;
+        for (MediaDevice in_list : mediaDevices) {
+            if (null != in_list
+                    && DeviceType.WIRED_HEADSET.equals(in_list.deviceType())
+                    && ConnectionState.CONNECTED.equals(in_list.platformConnectionState())) {
+                headset = in_list;
+            }
+        }
+
+        if (null != headset) {
+            Log.d(TAG, "onWiredDeviceConnected ? " + headset);
+            connect(headset).then(aBoolean -> {
+                Log.d(TAG, "onWiredDeviceConnected :: connect result ? " + aBoolean);
+            }).error(error -> Log.e(TAG, "onWiredDeviceConnected :: connect result ? false with error", error));
+        } else {
+            Log.d(TAG, "onWiredDeviceConnected ? no headset, nothing will be done");
+        }
     }
 
     private void onConnectionState(@NonNull ConnectionStatesEvent holder) {
