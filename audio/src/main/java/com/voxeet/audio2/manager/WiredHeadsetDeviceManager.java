@@ -60,10 +60,7 @@ public class WiredHeadsetDeviceManager implements IDeviceManager<MediaDevice> {
     @NonNull
     @Override
     public Promise<List<MediaDevice>> enumerateDevices() {
-        return new Promise<>(solver -> {
-            if (device.isConnected()) solver.resolve(list);
-            else solver.resolve(new ArrayList<>());
-        });
+        return Promise.resolve(list);
     }
 
     @NonNull
@@ -83,6 +80,6 @@ public class WiredHeadsetDeviceManager implements IDeviceManager<MediaDevice> {
         } else {
             devicePlatformDeviceConnectionWrapper.setPlatformConnectionState(ConnectionState.DISCONNECTED);
         }
-        connectivityUpdate.apply(newWiredInformation.isPlugged() ? list : new ArrayList<>());
+        connectivityUpdate.apply(list);
     }
 }

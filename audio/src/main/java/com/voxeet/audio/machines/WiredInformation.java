@@ -18,6 +18,6 @@ public class WiredInformation {
     }
 
     public boolean isPlugged() {
-        return state == 1 && hasMic;
+        return state == 1;
     }
 }

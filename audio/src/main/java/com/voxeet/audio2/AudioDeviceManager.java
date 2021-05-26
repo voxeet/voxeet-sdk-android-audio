@@ -161,22 +161,29 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
      */
     private void onWiredHeadsetDeviceConnected(@NonNull List<MediaDevice> mediaDevices) {
         MediaDevice headset = null;
+
         for (MediaDevice in_list : mediaDevices) {
-            if (null != in_list
-                    && DeviceType.WIRED_HEADSET.equals(in_list.deviceType())
-                    && ConnectionState.CONNECTED.equals(in_list.platformConnectionState())) {
+            if (null != in_list && DeviceType.WIRED_HEADSET.equals(in_list.deviceType())) {
                 headset = in_list;
             }
         }
 
-        if (null != headset) {
-            Log.d(TAG, "onWiredDeviceConnected ? " + headset);
-            connect(headset).then(aBoolean -> {
-                Log.d(TAG, "onWiredDeviceConnected :: connect result ? " + aBoolean);
-            }).error(error -> Log.e(TAG, "onWiredDeviceConnected :: connect result ? false with error", error));
+        if (null == headset) return;
+
+        boolean platformConnected = ConnectionState.CONNECTED.equals(headset.platformConnectionState());
+
+        Promise<Boolean> promise;
+        if (platformConnected) {
+            Log.d(TAG, "onWiredDeviceConnected ? connected : will attempt to connect (forced)");
+            promise = connect(headset);
         } else {
-            Log.d(TAG, "onWiredDeviceConnected ? no headset, nothing will be done");
+            Log.d(TAG, "onWiredDeviceConnected ? disconnected : will disconnect");
+            promise = disconnect(headset);
         }
+
+        promise.then(aBoolean -> {
+            Log.d(TAG, "onWiredDeviceConnected :: connection change result " + aBoolean);
+        }).error(error -> Log.e(TAG, "onWiredDeviceConnected :: connection change result with error", error));
     }
 
     private void onConnectionState(@NonNull ConnectionStatesEvent holder) {
