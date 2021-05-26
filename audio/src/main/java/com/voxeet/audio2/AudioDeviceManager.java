@@ -17,6 +17,9 @@ import com.voxeet.audio2.manager.SystemDeviceManager;
 import com.voxeet.audio2.manager.WiredHeadsetDeviceManager;
 import com.voxeet.audio2.system.SystemAudioManager;
 import com.voxeet.promise.Promise;
+import com.voxeet.promise.solve.ErrorPromise;
+import com.voxeet.promise.solve.PromiseSolver;
+import com.voxeet.promise.solve.Solver;
 import com.voxeet.promise.solve.ThenVoid;
 
 import java.util.ArrayList;
@@ -175,7 +178,27 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
         Promise<Boolean> promise;
         if (platformConnected) {
             Log.d(TAG, "onWiredDeviceConnected ? connected : will attempt to connect (forced)");
-            promise = connect(headset);
+            MediaDevice finalHeadset = headset;
+            promise = new Promise<>(solver -> enumerateDevices().then(devices -> {
+                List<MediaDevice> current_attemps = new ArrayList<>();
+                for (MediaDevice device:                     devices) {
+                    boolean connected = ConnectionState.CONNECTED.equals(device.connectionState());
+                    boolean connecting = ConnectionState.CONNECTING.equals(device.connectionState());
+                    boolean media = DeviceType.NORMAL_MEDIA.equals(device.deviceType());
+                    boolean wired_headset = DeviceType.WIRED_HEADSET.equals(device.deviceType());
+                    if(!(media || wired_headset) && (connected || connecting)) {
+                        current_attemps.add(device);
+                    }
+                }
+
+                if(current_attemps.size() > 0) {
+                    Log.d(TAG, "some in-call devices where already pending, we are then connecting the wired headset");
+                    solver.resolve(connect(finalHeadset));
+                } else {
+                    Log.d(TAG, "no devices where active, we skip connecting to wire, we are in normal mode, WARNING : it currently does not check the queue, please act accordingly");
+                    solver.resolve(true);
+                }
+            }).error(error -> solver.resolve(false)));
         } else {
             Log.d(TAG, "onWiredDeviceConnected ? disconnected : will disconnect");
             promise = disconnect(headset);
