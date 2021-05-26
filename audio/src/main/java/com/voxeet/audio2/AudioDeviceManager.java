@@ -183,6 +183,8 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
 
         promise.then(aBoolean -> {
             Log.d(TAG, "onWiredDeviceConnected :: connection change result " + aBoolean);
+            //sending device update
+            sendUpdate();
         }).error(error -> Log.e(TAG, "onWiredDeviceConnected :: connection change result with error", error));
     }
 
@@ -194,6 +196,12 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
         return wiredHeadsetDeviceManager.isConnected();
     }
 
+    /**
+     * Send a device update to the registered clients
+     *
+     * TODO improve the sendUpdate method by checking the previous computation state of all devices
+     * and with the new one to avoid possibly sending twice+ the same event
+     */
     private void sendUpdate() {
         this.update.apply(enumerateDevices());
     }
