@@ -45,16 +45,10 @@ List<MediaDevice> filtered = manager.filter(List<MediaDevice>, DeviceType);
 Promise<Boolean> connection = manager.connect(MediaDevice);
 ```
 
-## Disonnect from a device
+## Disconnect from a device
 
 ```
 Promise<Boolean> connection = manager.disconnect(MediaDevice);
-```
-
-## Current device
-
-```
-Promise<MediaDevice> current = manager.current();
 ```
 
 # Models
