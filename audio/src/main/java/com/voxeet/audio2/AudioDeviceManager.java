@@ -17,9 +17,6 @@ import com.voxeet.audio2.manager.SystemDeviceManager;
 import com.voxeet.audio2.manager.WiredHeadsetDeviceManager;
 import com.voxeet.audio2.system.SystemAudioManager;
 import com.voxeet.promise.Promise;
-import com.voxeet.promise.solve.ErrorPromise;
-import com.voxeet.promise.solve.PromiseSolver;
-import com.voxeet.promise.solve.Solver;
 import com.voxeet.promise.solve.ThenVoid;
 
 import java.util.ArrayList;
@@ -181,17 +178,19 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
             MediaDevice finalHeadset = headset;
             promise = new Promise<>(solver -> enumerateDevices().then(devices -> {
                 List<MediaDevice> current_attemps = new ArrayList<>();
-                for (MediaDevice device:                     devices) {
+
+                for (MediaDevice device : devices) {
                     boolean connected = ConnectionState.CONNECTED.equals(device.connectionState());
                     boolean connecting = ConnectionState.CONNECTING.equals(device.connectionState());
                     boolean media = DeviceType.NORMAL_MEDIA.equals(device.deviceType());
                     boolean wired_headset = DeviceType.WIRED_HEADSET.equals(device.deviceType());
-                    if(!(media || wired_headset) && (connected || connecting)) {
+                    Log.d(TAG, device.id() + " " + device.deviceType() + " " + connected + " " + connecting + " " + media + " " + wired_headset);
+                    if (!(media || wired_headset) && (connected || connecting)) {
                         current_attemps.add(device);
                     }
                 }
 
-                if(current_attemps.size() > 0) {
+                if (current_attemps.size() > 0) {
                     Log.d(TAG, "some in-call devices where already pending, we are then connecting the wired headset");
                     solver.resolve(connect(finalHeadset));
                 } else {
@@ -221,7 +220,7 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
 
     /**
      * Send a device update to the registered clients
-     *
+     * <p>
      * TODO improve the sendUpdate method by checking the previous computation state of all devices
      * and with the new one to avoid possibly sending twice+ the same event
      */

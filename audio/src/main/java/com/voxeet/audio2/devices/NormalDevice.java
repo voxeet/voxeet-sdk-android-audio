@@ -67,13 +67,4 @@ public class NormalDevice extends MediaDevice<DeviceType> {
             }).error(solver::reject);
         });
     }
-
-    @NonNull
-    @Override
-    public DeviceType deviceType() {
-        if (MediaDeviceHelper.isWiredHeadsetConnected(audioManager) && ConnectionState.CONNECTED.equals(connectionState)) {
-            return DeviceType.WIRED_HEADSET;
-        }
-        return super.deviceType();
-    }
 }
