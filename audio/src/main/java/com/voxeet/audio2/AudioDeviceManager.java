@@ -7,6 +7,7 @@ import com.voxeet.audio.utils.Log;
 import com.voxeet.audio.utils.__Call;
 import com.voxeet.audio.utils.__Opt;
 import com.voxeet.audio2.devices.MediaDevice;
+import com.voxeet.audio2.devices.WiredDevice;
 import com.voxeet.audio2.devices.description.ConnectionState;
 import com.voxeet.audio2.devices.description.ConnectionStatesEvent;
 import com.voxeet.audio2.devices.description.DeviceType;
@@ -162,8 +163,11 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
     private void onWiredHeadsetDeviceConnected(@NonNull List<MediaDevice> mediaDevices) {
         MediaDevice headset = null;
 
+
         for (MediaDevice in_list : mediaDevices) {
-            if (null != in_list && DeviceType.WIRED_HEADSET.equals(in_list.deviceType())) {
+            if (null == in_list) continue;
+
+            if (in_list instanceof WiredDevice) {
                 headset = in_list;
             }
         }
@@ -183,9 +187,13 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
                     boolean connected = ConnectionState.CONNECTED.equals(device.connectionState());
                     boolean connecting = ConnectionState.CONNECTING.equals(device.connectionState());
                     boolean media = DeviceType.NORMAL_MEDIA.equals(device.deviceType());
+
+                    //wired_headset and internal_speaker are merged in new versions
                     boolean wired_headset = DeviceType.WIRED_HEADSET.equals(device.deviceType());
-                    Log.d(TAG, device.id() + " " + device.deviceType() + " " + connected + " " + connecting + " " + media + " " + wired_headset);
-                    if (!(media || wired_headset) && (connected || connecting)) {
+                    boolean internal_speaker = DeviceType.INTERNAL_SPEAKER.equals(device.deviceType());
+
+                    Log.d(TAG, device.id() + " " + device.deviceType() + " " + connected + " " + connecting + " " + media + " " + wired_headset + " " + internal_speaker);
+                    if (!(media || wired_headset || internal_speaker) && (connected || connecting)) {
                         current_attemps.add(device);
                     }
                 }

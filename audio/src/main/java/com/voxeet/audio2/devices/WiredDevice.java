@@ -5,21 +5,32 @@ import android.support.annotation.NonNull;
 
 import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.audio.focus.AudioFocusMode;
+import com.voxeet.audio.mode.MediaMode;
+import com.voxeet.audio.mode.NormalMode;
 import com.voxeet.audio.mode.WiredMode;
 import com.voxeet.audio.utils.__Call;
 import com.voxeet.audio2.devices.description.ConnectionState;
 import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.description.IMediaDeviceConnectionState;
 import com.voxeet.promise.Promise;
+import com.voxeet.promise.solve.ThenPromise;
 
 public class WiredDevice extends MediaDevice<DeviceType> {
 
     @NonNull
     private AudioManager audioManager;
     private AudioFocusManager audioFocusManagerCall = new AudioFocusManager(AudioFocusMode.CALL);
+    private AudioFocusManager audioMediaFocusManagerCall = new AudioFocusManager(AudioFocusMode.MEDIA);
+
+    @NonNull
+    private NormalMode normalMode;
+    private MediaMode mediaMode;
 
     @NonNull
     private WiredMode mode;
+
+
+    private boolean isWiredPlugged = false;
 
     public WiredDevice(
             @NonNull AudioManager audioManager,
@@ -30,8 +41,12 @@ public class WiredDevice extends MediaDevice<DeviceType> {
         super(connectionState, deviceType, id);
 
         this.audioManager = audioManager;
+        normalMode = new NormalMode(audioManager, audioFocusManagerCall);
+        mediaMode = new MediaMode(audioManager, audioMediaFocusManagerCall);
         mode = new WiredMode(audioManager, audioFocusManagerCall);
-        afterBuild.apply(connectionState1 -> WiredDevice.this.platformConnectionState = connectionState1);
+        setWiredMode(mode.isConnected());
+        afterBuild.apply(connectionState1 -> isWiredPlugged = ConnectionState.CONNECTED.equals(connectionState1));
+
     }
 
     @NonNull
@@ -55,7 +70,9 @@ public class WiredDevice extends MediaDevice<DeviceType> {
     protected Promise<Boolean> disconnect() {
         return new Promise<>(solver -> {
             setConnectionState(ConnectionState.DISCONNECTING);
-            mode.apply(false).then(aBoolean -> {
+            mode.apply(false).then((ThenPromise<Boolean, Boolean>) aBoolean -> {
+                return normalMode.abandonAudioFocus();
+            }).then(aBoolean -> {
                 setConnectionState(ConnectionState.DISCONNECTED);
                 solver.resolve(true);
             }).error(error -> {
@@ -66,7 +83,21 @@ public class WiredDevice extends MediaDevice<DeviceType> {
         });
     }
 
+    @NonNull
+    @Override
+    public DeviceType deviceType() {
+        return isWiredMode() ? DeviceType.WIRED_HEADSET : super.deviceType();
+    }
+
+    private boolean isWiredMode() {
+        return isWiredPlugged || mode.isConnected();
+    }
+
     public boolean isConnected() {
         return mode.isConnected();
+    }
+
+    public void setWiredMode(boolean plugged) {
+        isWiredPlugged = plugged;
     }
 }

@@ -10,7 +10,6 @@ import com.voxeet.audio.utils.__Call;
 import com.voxeet.audio2.devices.MediaDevice;
 import com.voxeet.audio2.devices.PlatformDeviceConnectionWrapper;
 import com.voxeet.audio2.devices.WiredDevice;
-import com.voxeet.audio2.devices.description.ConnectionState;
 import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.description.IMediaDeviceConnectionState;
 import com.voxeet.audio2.receiver.WiredHeadsetStateReceiver;
@@ -43,8 +42,8 @@ public class WiredHeadsetDeviceManager implements IDeviceManager<MediaDevice> {
 
         this.device = new WiredDevice(systemAudioManager.audioManager(),
                 connectionState,
-                DeviceType.WIRED_HEADSET,
-                "wired_headset",
+                DeviceType.INTERNAL_SPEAKER,
+                "default_speaker",
                 wrapper -> devicePlatformDeviceConnectionWrapper = wrapper);
 
         this.list = new ArrayList<>();
@@ -75,11 +74,7 @@ public class WiredHeadsetDeviceManager implements IDeviceManager<MediaDevice> {
     }
 
     private void onNewWiredInformation(@NonNull WiredInformation newWiredInformation) {
-        if (newWiredInformation.isPlugged()) {
-            devicePlatformDeviceConnectionWrapper.setPlatformConnectionState(ConnectionState.CONNECTED);
-        } else {
-            devicePlatformDeviceConnectionWrapper.setPlatformConnectionState(ConnectionState.DISCONNECTED);
-        }
+        device.setWiredMode(newWiredInformation.isPlugged());
         connectivityUpdate.apply(list);
     }
 }

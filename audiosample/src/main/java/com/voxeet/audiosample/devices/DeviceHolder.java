@@ -7,7 +7,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.voxeet.audio.utils.__Call;
-import com.voxeet.audio2.devices.BluetoothDevice;
 import com.voxeet.audio2.devices.MediaDevice;
 import com.voxeet.audiosample.R;
 
@@ -30,7 +29,7 @@ public class DeviceHolder extends RecyclerView.ViewHolder {
 
     public void bind(MediaDevice mediaDevice) {
         this.mediaDevice = mediaDevice;
-        device_id.setText(mediaDevice.id());
+        device_id.setText(mediaDevice.id() + " (" + mediaDevice.deviceType() + ")");
         device_connectivity_status.setText(mediaDevice.connectionState().name());
         device_platform_connectivity_status.setText(mediaDevice.platformConnectionState().name());
     }
