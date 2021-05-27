@@ -7,7 +7,7 @@ This Android library helps managing the various event and feature around externa
 ```gradle
 dependencies {
   //add this one if you want to use the logic-only SDK
-  compile ('com.voxeet.sdk:audio:2.2.0') {
+  compile ('com.voxeet.sdk:audio:2.2.2') {
     transitive = true
   }
 }
@@ -61,7 +61,8 @@ DeviceType {
     EXTERNAL_SPEAKER,
     BLUETOOTH,
     NORMAL_MEDIA,
-    WIRED_HEADSET, USB
+    WIRED_HEADSET,
+    USB
 }
 ```
 
@@ -115,6 +116,10 @@ The various test implementation results can be found in the following folders. U
 - [Code Coverage](./audio/build/reports/coverage/debug/index.html)
 
 # Changelogs
+
+v2.2.2 :
+  - merge wired_headset and internal_speaker into one default_speaker device
+  - fix behavior where plugging / unplugging wired headset wouldn't generate expected device update event
 
 v2.x :
   - asynchronous and safe use of various device manipulation
