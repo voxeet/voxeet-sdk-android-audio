@@ -35,6 +35,8 @@ import java.util.Set;
 
 public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDevice> {
 
+    public static final String BLUETOOTH_CONNECT_EXCEPTION = "requestDevices: having security exception, did you prompt the user with BLUETOOTH_CONNECT permission on Android 12+?";
+
     private static final String TAG = BluetoothHeadsetDeviceManager.class.getSimpleName();
     private final __Call<List<BluetoothDevice>> connectivityUpdate;
     private final IMediaDeviceConnectionState connectionState;
@@ -82,12 +84,12 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
                 if (requestDevices.hasNew) {
                     connectivityUpdate.apply(requestDevices.list);
                 }
+
+                android.bluetooth.BluetoothDevice device = bluetoothHeadsetServiceListener.getActiveDevice();
+                updateActiveDevice(device);
             } catch (Exception exception) {
                 Log.e(TAG, "Exception in handler", exception);
             }
-            android.bluetooth.BluetoothDevice device = bluetoothHeadsetServiceListener.getActiveDevice();
-            updateActiveDevice(device);
-
             if (null != handler) handler.postDelayed(runnable, 5000);
         };
 
@@ -240,7 +242,13 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
     private RequestDevices requestDevices() {
         boolean hasNew = false;
         BluetoothHeadset headset = bluetoothHeadsetServiceListener.bluetoothHeadset();
-        List<android.bluetooth.BluetoothDevice> devices = __Opt.of(headset).then(BluetoothHeadset::getConnectedDevices).or(new ArrayList<>());
+        List<android.bluetooth.BluetoothDevice> devices = new ArrayList<>();
+        try {
+            devices = __Opt.of(headset).then(BluetoothHeadset::getConnectedDevices).or(new ArrayList<>());
+        } catch (SecurityException exception) {
+            Log.e(TAG, BLUETOOTH_CONNECT_EXCEPTION, exception);
+        }
+
         for (android.bluetooth.BluetoothDevice device : devices) {
             BluetoothDevice in_list = matching(list, device);
             if (null != in_list) {

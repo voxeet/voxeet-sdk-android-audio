@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import com.voxeet.audio.utils.Log;
 import com.voxeet.audio.utils.__Call;
 import com.voxeet.audio.utils.__Opt;
+import com.voxeet.audio2.manager.BluetoothHeadsetDeviceManager;
 
 public class BluetoothHeadsetServiceListener {
 
@@ -53,7 +54,6 @@ public class BluetoothHeadsetServiceListener {
     public BluetoothHeadsetServiceListener(@NonNull __Call<BluetoothHeadsetServiceListener> update) {
         this();
 
-
         try {
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         } catch (VerifyError exception) {
@@ -65,7 +65,6 @@ public class BluetoothHeadsetServiceListener {
     }
 
     public void connect(@NonNull Context context) {
-
         try {
             if (null != bluetoothAdapter) {
                 Log.d(TAG, "acquiring BluetoothProfile.HEADSET...");
@@ -89,12 +88,22 @@ public class BluetoothHeadsetServiceListener {
 
     @Nullable
     public BluetoothDevice getActiveDevice() {
-        return __Opt.of(bluetoothHeadsetProfile).then(BluetoothHelper::getActiveDevice).orNull();
+        try {
+            return __Opt.of(bluetoothHeadsetProfile).then(BluetoothHelper::getActiveDevice).orNull();
+        } catch (SecurityException exception) {
+            Log.e(TAG, BluetoothHeadsetDeviceManager.BLUETOOTH_CONNECT_EXCEPTION, exception);
+            return null;
+        }
     }
 
     @Nullable
     public boolean setActiveDevice(@NonNull BluetoothDevice device) {
-        return __Opt.of(bluetoothHeadsetProfile).then(h -> BluetoothHelper.setActiveDevice(h, device)).or(false);
+        try {
+            return __Opt.of(bluetoothHeadsetProfile).then(h -> BluetoothHelper.setActiveDevice(h, device)).or(false);
+        } catch (SecurityException exception) {
+            Log.e(TAG, BluetoothHeadsetDeviceManager.BLUETOOTH_CONNECT_EXCEPTION, exception);
+            return false;
+        }
     }
 
     public boolean canFetchAndSetActiveDevices() {

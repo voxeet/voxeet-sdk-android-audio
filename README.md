@@ -117,6 +117,10 @@ The various test implementation results can be found in the following folders. U
 
 # Changelogs
 
+v2.3.0 :
+  - following Android 12 new behavior related to the permissions, to have properly the various bluetooth devices listed, you will need to ask explicitly the BLUETOOTH_CONNECT permission. Please refer to the [permissions for Android 12 or higher article](https://developer.android.com/guide/topics/connectivity/bluetooth/permissions#declare-android12-or-higher)
+  - added catch block to prevent crash on permission-less app used on Android 12
+
 v2.2.2 :
   - merge wired_headset and internal_speaker into one default_speaker device
   - fix behavior where plugging / unplugging wired headset wouldn't generate expected device update event

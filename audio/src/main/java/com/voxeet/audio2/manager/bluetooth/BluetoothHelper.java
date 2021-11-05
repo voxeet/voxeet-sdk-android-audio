@@ -6,12 +6,16 @@ import android.bluetooth.BluetoothHeadset;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.voxeet.audio.utils.Log;
 import com.voxeet.audio.utils.__Opt;
+import com.voxeet.audio2.manager.BluetoothHeadsetDeviceManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class BluetoothHelper {
+
+    private static final String TAG = BluetoothHelper.class.getSimpleName();
 
     public static boolean canFetchActiveDevice(@NonNull BluetoothHeadset headset) {
         return null != _getActiveDevice(headset);
@@ -38,10 +42,12 @@ public class BluetoothHelper {
         try {
             Class<?> klass = headset.getClass();
             return klass.getDeclaredMethod("setActiveDevice", BluetoothDevice.class);
+        } catch (SecurityException exception) {
+            Log.e(TAG, BluetoothHeadsetDeviceManager.BLUETOOTH_CONNECT_EXCEPTION, exception);
         } catch (Exception exception) {
             exception.printStackTrace();
-            return null;
         }
+        return null;
     }
 
     @Nullable
@@ -49,10 +55,12 @@ public class BluetoothHelper {
         try {
             Class<?> klass = headset.getClass();
             return klass.getDeclaredMethod("getActiveDevice");
+        } catch (SecurityException exception) {
+            Log.e(TAG, BluetoothHeadsetDeviceManager.BLUETOOTH_CONNECT_EXCEPTION, exception);
         } catch (Exception exception) {
             exception.printStackTrace();
-            return null;
         }
+        return null;
     }
 
     @Nullable
@@ -64,11 +72,12 @@ public class BluetoothHelper {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
             e.printStackTrace();
+        } catch (SecurityException exception) {
+            Log.e(TAG, BluetoothHeadsetDeviceManager.BLUETOOTH_CONNECT_EXCEPTION, exception);
         }
         return null;
     }
 
-    @Nullable
     private static boolean _invokeSetActiveDevice(@NonNull BluetoothHeadset headset,
                                                   @NonNull Method setActiveDevice,
                                                   @NonNull BluetoothDevice device) {
@@ -78,6 +87,8 @@ public class BluetoothHelper {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
             e.printStackTrace();
+        } catch (SecurityException exception) {
+            Log.e(TAG, BluetoothHeadsetDeviceManager.BLUETOOTH_CONNECT_EXCEPTION, exception);
         }
         return false;
     }
