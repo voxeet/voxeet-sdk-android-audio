@@ -3,7 +3,8 @@ package com.voxeet.audio2.manager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.voxeet.audio.machines.WiredInformation;
 import com.voxeet.audio.utils.__Call;

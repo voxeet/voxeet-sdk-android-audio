@@ -3,7 +3,8 @@ package com.voxeet.audio2.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.voxeet.audio.machines.WiredInformation;
 import com.voxeet.audio.utils.Log;

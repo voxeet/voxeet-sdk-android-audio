@@ -1,8 +1,12 @@
 package com.voxeet.audio.mode;
 
+import static android.media.AudioManager.MODE_CURRENT;
+import static android.media.AudioManager.MODE_IN_COMMUNICATION;
+
 import android.media.AudioManager;
 import android.os.Build;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.voxeet.audio.MediaDevice;
 import com.voxeet.audio.focus.AudioFocusManager;
@@ -10,9 +14,6 @@ import com.voxeet.audio.focus.AudioFocusManagerAsync;
 import com.voxeet.audio.utils.Log;
 import com.voxeet.promise.Promise;
 import com.voxeet.promise.solve.ThenPromise;
-
-import static android.media.AudioManager.MODE_CURRENT;
-import static android.media.AudioManager.MODE_IN_COMMUNICATION;
 
 public class SpeakerMode extends AbstractMode {
 

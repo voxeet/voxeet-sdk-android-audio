@@ -1,7 +1,8 @@
 package com.voxeet.audio.utils;
 
 import android.os.Build;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

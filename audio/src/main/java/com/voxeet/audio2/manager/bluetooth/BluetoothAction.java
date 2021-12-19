@@ -1,8 +1,9 @@
 package com.voxeet.audio2.manager.bluetooth;
 
 import android.bluetooth.BluetoothDevice;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public class BluetoothAction {
 

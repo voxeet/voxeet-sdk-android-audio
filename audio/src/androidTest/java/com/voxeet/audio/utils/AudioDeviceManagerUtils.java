@@ -3,7 +3,8 @@ package com.voxeet.audio.utils;
 import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.voxeet.audio2.AudioDeviceManager;
 import com.voxeet.audio2.devices.MediaDevice;

@@ -1,12 +1,10 @@
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:4.1.0")
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
+        classpath 'com.android.tools.build:gradle:4.2.0'
     }
 }
 
@@ -16,9 +14,10 @@ plugins {
 
 allprojects {
     repositories {
+        maven { url "https://android-sdk.voxeet.com/release" }
         google()
         mavenLocal()
-        jcenter()
+        mavenCentral()
     }
 }
 
@@ -30,20 +29,24 @@ task clean(type: Delete) {
 task installAll {
     dependsOn(':audio:clean')
     dependsOn(':audio:assembleRelease')
-    dependsOn(':audio:install')
+    dependsOn(':audio:publishToMavenLocal')
 }
 
 subprojects {
     task allDeps(type: DependencyReportTask) {}
 }
 ext {
-    buildToolsVersion = "29.0.3"
+    buildToolsVersion = "31.0.0"
     minSdkVersion = 16
-    compileSdkVersion = 29
-    targetSdkVersion = 29
-    supportLibVersion = "28.0.0"
+    compileSdkVersion = 31
+    targetSdkVersion = 31
     ndkVersion = "21.4.7075529"
-
+    groupId = "com.voxeet.sdk"
     audioSdkVersion = "2.3.0"
+    promiseVersion = "2.6.1"
+
+    androidXCore = "1.6.0"
+    androidXAppCompatVersion = "1.4.0"
+    androidXRecyclerVersion = "1.2.1"
 }
 

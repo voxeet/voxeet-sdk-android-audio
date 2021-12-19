@@ -4,8 +4,9 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 import com.voxeet.audio.utils.Log;
 import com.voxeet.promise.Promise;

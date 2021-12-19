@@ -1,25 +1,26 @@
 package com.voxeet.audiosample;
 
 import android.content.pm.PackageManager;
-import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.sample.oboe.hellooboe.PlaybackEngine;
 import com.voxeet.audio.utils.__Opt;
 import com.voxeet.audio2.AudioDeviceManager;
 import com.voxeet.audio2.devices.BluetoothDevice;
+import com.voxeet.audio2.devices.MediaDevice;
 import com.voxeet.audio2.devices.MediaDeviceHelper;
 import com.voxeet.audio2.devices.description.DeviceType;
-import com.voxeet.audio2.devices.MediaDevice;
 import com.voxeet.audiosample.devices.DevicesAdapter;
 import com.voxeet.promise.Promise;
 import com.voxeet.promise.PromiseInOut;

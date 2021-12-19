@@ -1,7 +1,8 @@
 package com.voxeet.audio.focus;
 
 import android.media.AudioManager;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.voxeet.promise.Promise;
 

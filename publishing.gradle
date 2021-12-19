@@ -1,0 +1,43 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
+
+task sourceJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier "sources"
+}
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                // Applies the component for the release build variant.
+                // hack derivated 'from components.release', since we have flavors in the app,
+                // we need to explicitly get the projet's components
+                from project(":${project.name}").components.release
+
+                artifactId = "${project.name}"
+                groupId = rootProject.ext.groupId
+                version = rootProject.ext.audioSdkVersion
+            }
+        }
+        repositories {
+            mavenLocal()
+
+            if (null != System.env.CODEARTIFACT_DOMAIN) {
+                // if new repositories needs to be added, it can be done below
+                // and if for those repositories, conditions need to be applied, it can be done using if statements
+                maven {
+                  url "https://${System.env.CODEARTIFACT_DOMAIN}-${System.env.CODEARTIFACT_DOMAIN_OWNER_ID}.d.codeartifact.${System.env.CODEARTIFACT_REGION}.amazonaws.com/maven/${System.env.CODEARTIFACT_REPO}/"
+                  credentials {
+                    username "aws"
+                    password "${System.env.CODEARTIFACT_AUTH_TOKEN}"
+                  }
+                  metadataSources {
+                    mavenPom()
+                    artifact()
+                  }
+                }
+            }
+        }
+    }
+}

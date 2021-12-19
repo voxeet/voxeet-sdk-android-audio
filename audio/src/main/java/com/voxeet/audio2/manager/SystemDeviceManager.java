@@ -1,6 +1,6 @@
 package com.voxeet.audio2.manager;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.voxeet.audio2.devices.MediaDevice;
 import com.voxeet.audio2.devices.NormalMediaDevice;

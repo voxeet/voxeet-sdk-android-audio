@@ -3,8 +3,9 @@ package com.voxeet.audio2.manager.bluetooth;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.voxeet.audio.utils.Log;
 import com.voxeet.audio.utils.__Opt;

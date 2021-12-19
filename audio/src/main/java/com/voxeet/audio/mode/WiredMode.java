@@ -1,7 +1,10 @@
 package com.voxeet.audio.mode;
 
+import static android.media.AudioManager.MODE_IN_COMMUNICATION;
+
 import android.media.AudioManager;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.voxeet.audio.MediaDevice;
 import com.voxeet.audio.focus.AudioFocusManager;
@@ -9,8 +12,6 @@ import com.voxeet.audio.focus.AudioFocusManagerAsync;
 import com.voxeet.audio2.devices.MediaDeviceHelper;
 import com.voxeet.promise.Promise;
 import com.voxeet.promise.solve.ThenPromise;
-
-import static android.media.AudioManager.MODE_IN_COMMUNICATION;
 
 public class WiredMode extends AbstractMode {
 

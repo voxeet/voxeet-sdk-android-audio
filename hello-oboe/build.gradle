@@ -40,6 +40,6 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile project(':hello-oboe-audio-device')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation project(':hello-oboe-audio-device')
 }

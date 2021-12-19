@@ -1,6 +1,6 @@
 package com.voxeet.system.record;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.nio.ByteBuffer;
 

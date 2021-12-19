@@ -1,6 +1,6 @@
 package com.voxeet.audio.utils;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 public class Log {
     private static boolean enable = false;

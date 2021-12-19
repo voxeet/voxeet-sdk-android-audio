@@ -3,7 +3,8 @@ package com.voxeet.audio2.devices;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.os.Build;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.voxeet.audio2.devices.description.ConnectionState;
 
