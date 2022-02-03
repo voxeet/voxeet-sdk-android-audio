@@ -7,13 +7,18 @@ This Android library helps managing the various event and feature around externa
 ```gradle
 dependencies {
   //add this one if you want to use the logic-only SDK
-  compile ('com.voxeet.sdk:audio:2.2.2') {
+  compile ('com.voxeet.sdk:audio:2.5.0') {
     transitive = true
   }
 }
 ```
 
 # Usage
+
+Breaking change : a new version exists which now by default sets the Wired Headset mode as stream music
+instead of call mode. This is forced by design until a new version of the library lets full control
+over which device and what mode to use. In the meantime, if the previous mode is required, you can
+use `WiredMode.SetAsMusic = false`.
 
 ## Instance
 

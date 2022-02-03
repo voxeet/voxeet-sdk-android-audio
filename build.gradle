@@ -42,7 +42,7 @@ ext {
     targetSdkVersion = 31
     ndkVersion = "21.4.7075529"
     groupId = "com.voxeet.sdk"
-    audioSdkVersion = "2.3.0"
+    audioSdkVersion = "2.4.0"
     promiseVersion = "2.6.1"
 
     androidXCore = "1.6.0"
