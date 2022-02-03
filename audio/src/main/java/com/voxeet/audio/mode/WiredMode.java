@@ -1,8 +1,10 @@
 package com.voxeet.audio.mode;
 
+import static android.media.AudioManager.MODE_CURRENT;
 import static android.media.AudioManager.MODE_IN_COMMUNICATION;
 
 import android.media.AudioManager;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
 
@@ -21,14 +23,16 @@ public class WiredMode extends AbstractMode {
      * A side effect of using the non stream music is that a main library used will collide with this
      * We need to set it for now, if it's an indesirable effect, please change to false to have the previous
      * behaviour
-     *
+     * <p>
      * A future version of the library will have a proper way of handling those conflicts by making
      * device merges possible
      */
     public static boolean SetAsMusic = true;
+    private final AudioFocusManager mediaFocusManager;
 
-    public WiredMode(@NonNull AudioManager manager, @NonNull AudioFocusManager audioFocusManager) {
+    public WiredMode(@NonNull AudioManager manager, @NonNull AudioFocusManager audioFocusManager, AudioFocusManager audioMediaFocusManagerCall) {
         super(manager, audioFocusManager, MediaDevice.ROUTE_HEADSET);
+        this.mediaFocusManager = audioMediaFocusManagerCall;
     }
 
     @Override
@@ -57,6 +61,19 @@ public class WiredMode extends AbstractMode {
             }
 
             forceVolumeControlStream(requestFocus);
+
+            if (isConnected() && !"samsung".equalsIgnoreCase(Build.BRAND)) {
+                Log.d("WiredMode", "not a samsung device, we need to force to media only");
+
+                int finalRequestFocus = requestFocus;
+                mediaFocusManager.requestAudioFocus(manager, requestFocus).then(integer -> {
+                    forceVolumeControlStream(finalRequestFocus);
+                    solver.resolve(true);
+                }).error(solver::reject);
+                return;
+            }
+            Log.d("WiredMode", "samsung, requesting audio focus and solving");
+
             audioFocusManger.requestAudioFocus(manager, requestFocus).then(integer -> {
                 solver.resolve(true);
             }).error(solver::reject);

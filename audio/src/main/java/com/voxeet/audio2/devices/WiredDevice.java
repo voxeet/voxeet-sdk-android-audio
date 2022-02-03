@@ -44,7 +44,7 @@ public class WiredDevice extends MediaDevice<DeviceType> {
         this.audioManager = audioManager;
         normalMode = new NormalMode(audioManager, audioFocusManagerCall);
         mediaMode = new MediaMode(audioManager, audioMediaFocusManagerCall);
-        mode = new WiredMode(audioManager, audioFocusManagerCall);
+        mode = new WiredMode(audioManager, audioFocusManagerCall, audioMediaFocusManagerCall);
         setWiredMode(mode.isConnected());
         afterBuild.apply(connectionState1 -> isWiredPlugged = ConnectionState.CONNECTED.equals(connectionState1));
 
