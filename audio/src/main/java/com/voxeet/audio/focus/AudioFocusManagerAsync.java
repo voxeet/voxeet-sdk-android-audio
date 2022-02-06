@@ -16,6 +16,8 @@ public class AudioFocusManagerAsync {
     private static Handler handler;
     private static Handler mainHandler = new Handler(Looper.getMainLooper());
 
+    public static boolean enableSetMode = true;
+
     private AudioFocusManagerAsync() {
 
     }
@@ -28,6 +30,13 @@ public class AudioFocusManagerAsync {
     }
 
     public static Promise<Boolean> setMode(@NonNull AudioManager manager, int mode, @NonNull String tag) {
+        if(!AudioFocusManagerAsync.enableSetMode) {
+            return new Promise<>(solver -> {
+                Log.d(tag, "set mode starting but disabled ! " + mode + " won't be set");
+                mainHandler.post(() -> solver.resolve(true));
+            });
+        }
+
         return new Promise<>(solver -> {
             Log.d(tag, "mode starting");
             post(() -> manager.setMode(mode), () -> {
