@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import com.voxeet.audio.machines.WiredInformation;
 import com.voxeet.audio.utils.__Call;
 import com.voxeet.audio2.devices.MediaDevice;
-import com.voxeet.audio2.devices.PlatformDeviceConnectionWrapper;
 import com.voxeet.audio2.devices.WiredDevice;
 import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.description.IMediaDeviceConnectionState;
@@ -24,9 +23,6 @@ public class WiredHeadsetDeviceManager implements IDeviceManager<MediaDevice> {
 
     private final WiredDevice device;
     private final __Call<List<MediaDevice>> connectivityUpdate;
-
-    private PlatformDeviceConnectionWrapper devicePlatformDeviceConnectionWrapper = (s) -> {
-    };
 
     private SystemAudioManager systemAudioManager;
     private WiredHeadsetStateReceiver wiredHeadsetStateReceiver;
@@ -44,13 +40,15 @@ public class WiredHeadsetDeviceManager implements IDeviceManager<MediaDevice> {
         this.device = new WiredDevice(systemAudioManager.audioManager(),
                 connectionState,
                 DeviceType.INTERNAL_SPEAKER,
-                "default_speaker",
-                wrapper -> devicePlatformDeviceConnectionWrapper = wrapper);
+                "default_speaker");
 
         this.list = new ArrayList<>();
         list.add(device);
         wiredHeadsetStateReceiver = new WiredHeadsetStateReceiver(this::onNewWiredInformation);
-        context.registerReceiver(wiredHeadsetStateReceiver, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
+        Intent lastState = context.registerReceiver(wiredHeadsetStateReceiver, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
+        if(null != lastState) {
+            wiredHeadsetStateReceiver.onReceive(context, lastState);
+        }
     }
 
     public boolean isConnected() {

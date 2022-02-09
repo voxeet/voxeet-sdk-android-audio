@@ -1,6 +1,5 @@
 package com.voxeet.audio.mode;
 
-import static android.media.AudioManager.MODE_CURRENT;
 import static android.media.AudioManager.MODE_IN_COMMUNICATION;
 
 import android.media.AudioManager;
@@ -29,10 +28,12 @@ public class WiredMode extends AbstractMode {
      */
     public static boolean SetAsMusic = true;
     private final AudioFocusManager mediaFocusManager;
+    private boolean isConnected;
 
     public WiredMode(@NonNull AudioManager manager, @NonNull AudioFocusManager audioFocusManager, AudioFocusManager audioMediaFocusManagerCall) {
         super(manager, audioFocusManager, MediaDevice.ROUTE_HEADSET);
         this.mediaFocusManager = audioMediaFocusManagerCall;
+        isConnected = MediaDeviceHelper.isWiredHeadsetConnected(manager);
     }
 
     @Override
@@ -82,6 +83,14 @@ public class WiredMode extends AbstractMode {
 
     @Override
     public boolean isConnected() {
-        return MediaDeviceHelper.isWiredHeadsetConnected(manager);
+        return isConnected;
+    }
+
+    /**
+     * Set the current WiredMode. This value needs to be updated by the parent's controller when required
+     * @param plugged
+     */
+    public void setConnected(boolean plugged) {
+        isConnected = plugged;
     }
 }

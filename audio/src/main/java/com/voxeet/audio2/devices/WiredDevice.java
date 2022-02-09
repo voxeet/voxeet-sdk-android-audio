@@ -9,7 +9,6 @@ import com.voxeet.audio.focus.AudioFocusMode;
 import com.voxeet.audio.mode.MediaMode;
 import com.voxeet.audio.mode.NormalMode;
 import com.voxeet.audio.mode.WiredMode;
-import com.voxeet.audio.utils.__Call;
 import com.voxeet.audio2.devices.description.ConnectionState;
 import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.description.IMediaDeviceConnectionState;
@@ -30,24 +29,18 @@ public class WiredDevice extends MediaDevice<DeviceType> {
     @NonNull
     private WiredMode mode;
 
-
-    private boolean isWiredPlugged = false;
-
     public WiredDevice(
             @NonNull AudioManager audioManager,
             @NonNull IMediaDeviceConnectionState connectionState,
             @NonNull DeviceType deviceType,
-            @NonNull String id,
-            @NonNull __Call<PlatformDeviceConnectionWrapper> afterBuild) {
+            @NonNull String id) {
         super(connectionState, deviceType, id);
 
         this.audioManager = audioManager;
         normalMode = new NormalMode(audioManager, audioFocusManagerCall);
         mediaMode = new MediaMode(audioManager, audioMediaFocusManagerCall);
         mode = new WiredMode(audioManager, audioFocusManagerCall, audioMediaFocusManagerCall);
-        setWiredMode(mode.isConnected());
-        afterBuild.apply(connectionState1 -> isWiredPlugged = ConnectionState.CONNECTED.equals(connectionState1));
-
+        setWiredMode(mode.isConnected()); //mode.isConnected() is returning the result from MediaDeviceHelper.isWiredHeadsetConnected
     }
 
     @NonNull
@@ -91,7 +84,7 @@ public class WiredDevice extends MediaDevice<DeviceType> {
     }
 
     private boolean isWiredMode() {
-        return isWiredPlugged || mode.isConnected();
+        return mode.isConnected();
     }
 
     public boolean isConnected() {
@@ -99,6 +92,6 @@ public class WiredDevice extends MediaDevice<DeviceType> {
     }
 
     public void setWiredMode(boolean plugged) {
-        isWiredPlugged = plugged;
+        mode.setConnected(plugged);
     }
 }
