@@ -128,7 +128,6 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
 
     private void onNewBluetoothServiceConnectivity(@NonNull BluetoothHeadsetServiceListener listener) {
         Log.d(TAG, "onNewBluetoothServiceConnectivity :: " + listener.isConnected());
-        connectivityUpdate.apply(devices());
         if (listener.isConnected()) {
             if (null == handler) {
                 handler = new Handler(Looper.getMainLooper());
@@ -139,7 +138,9 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
                 handler.removeCallbacks(runnable);
                 handler = null;
             }
+            updateActiveDevice(null);
         }
+        connectivityUpdate.apply(devices());
     }
 
     private void onNewBluetoothDeviceState(@NonNull BluetoothAction bluetoothAction) {
@@ -272,7 +273,8 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
     }
 
     private void onDisconnected(@NonNull BluetoothDevice bluetoothDevice) {
-
+        BluetoothDevice matching = matching(list, bluetoothDevice.bluetoothDevice());
+        if (matching != null) list.remove(bluetoothDevice);
     }
 
     private void setActiveDevice(@NonNull BluetoothDevice device) {
@@ -329,10 +331,15 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
                     need_disconnection = true;
                     break;
                 default:
+
             }
 
             if (need_disconnection) {
+                String id = __Opt.of(device.bluetoothDevice())
+                        .then(android.bluetooth.BluetoothDevice::getAddress).or("");
+                PlatformDeviceConnectionWrapper wrapper = wrappers.get(id);
                 try {
+                    wrapper.setPlatformConnectionState(ConnectionState.DISCONNECTED);
                     audioDeviceManager.disconnect(device).execute();
                 } catch (Exception e) {
                     e.printStackTrace();
