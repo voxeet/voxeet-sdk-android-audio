@@ -1,3 +1,17 @@
+def version = 'main'
+def random = new Random()
+
+def dolbyioGradle = "https://raw.githubusercontent.com/voxeet/voxeet-sdk-android-gradle/${version}/dolbyio.gradle?rand=${random.nextInt()}"
+apply from: dolbyioGradle
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        dolbyio {
+            from(files(gradle.dolbyio.files.catalog))
+        }
+    }
+}
+
 //project to get info about audio
 include ':audio', ':audiosample'
 

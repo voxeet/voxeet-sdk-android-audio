@@ -1,0 +1,6 @@
+def version_audio = { String version ->  project.hasProperty("AUDIO_SUFFIX") && project.AUDIO_SUFFIX.length() > 0
+        ? "${version}-${project.AUDIO_SUFFIX}"
+        : "${version}" }
+
+def version="2.5.1"
+rootProject.ext.version = version_audio(version)

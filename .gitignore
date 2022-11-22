@@ -73,3 +73,6 @@ fastlane/test_output
 fastlane/readme.md
 
 jacoco.exec
+
+# Dolby.io configuration
+**/dolbyio

@@ -1,23 +1,60 @@
+import org.jetbrains.dokka.gradle.DokkaTask
+
 buildscript {
+    apply from: gradle.dolbyio.files.modules
+
     repositories {
         google()
         mavenCentral()
+        gradlePluginPortal()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.0'
+        classpath dolbyio.android.gradlePlugin
+        classpath dolbyio.gradle.versions.plugin
+        classpath dolbyio.kotlin.gradlePlugin
+        classpath dolbyio.license.gradlePlugin
+        classpath dolbyio.sonarcube.gradlePlugin
+        classpath dolbyio.version.catalog.update.plugin
+        classpath dolbyio.dokka.gradlePlugin
     }
 }
 
 plugins {
-    id "org.sonarqube" version "2.7"
+    alias(dolbyio.plugins.dokka)
+    alias(dolbyio.plugins.publish.nexus)
+}
+
+apply from: gradle.dolbyio.files.jacocoProject
+apply from: gradle.dolbyio.files.dependencyUpdates
+
+nexusPublishing {
+    repositories {
+        sonatype()
+    }
+}
+
+ext {
+    ndkVersion = "21.4.7075529"
+    groupId = "com.voxeet.sdk"
 }
 
 allprojects {
     repositories {
-        maven { url "https://android-sdk.voxeet.com/release" }
         google()
-        mavenLocal()
         mavenCentral()
+        mavenLocal()
+        maven {
+            url "https://android-sdk.voxeet.com/release"
+            content {
+                includeGroup "com.voxeet.sdk"
+                //any other possible group with a new includeGroup line but as far as I remember I only created and set one group
+            }
+        }
+    }
+
+    tasks.withType(Javadoc) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+        options.addStringOption('encoding', 'UTF-8')
     }
 }
 
@@ -34,19 +71,42 @@ task installAll {
 
 subprojects {
     task allDeps(type: DependencyReportTask) {}
-}
-ext {
-    buildToolsVersion = "31.0.0"
-    minSdkVersion = 16
-    compileSdkVersion = 31
-    targetSdkVersion = 31
-    ndkVersion = "21.4.7075529"
-    groupId = "com.voxeet.sdk"
-    audioSdkVersion = "2.5.1"
-    promiseVersion = "2.6.1"
 
-    androidXCore = "1.6.0"
-    androidXAppCompatVersion = "1.4.0"
-    androidXRecyclerVersion = "1.2.1"
+    if (isSourcesModule(it)) {
+        apply from: gradle.dolbyio.files.moduleSetup
+        apply from: gradle.dolbyio.files.ktlint
+        apply from: gradle.dolbyio.files.detekt
+    }
+
+    tasks.withType(DokkaTask).configureEach {
+        dokkaSourceSets.configureEach {
+            displayName.set("Android")
+            // Disable linking to online kotlin-stdlib documentation
+            noStdlibLink.set(false)
+            // Disable linking to online JDK documentation
+            noJdkLink.set(false)
+            // Disable linking to online Android documentation (only applicable for Android projects)
+            noAndroidSdkLink.set(false)
+            // Used for linking to JDK documentation
+            jdkVersion.set(11)
+            // Suppress obvious functions like default toString or equals.
+            suppressObviousFunctions.set(true)
+            // A set of visibility modifiers that should be documented
+            documentedVisibilities.set([
+                org.jetbrains.dokka.DokkaConfiguration.Visibility.PUBLIC
+            ].toSet())
+            // Emit warnings about not documented members. Applies globally, also can be overridden by packageOptions
+            reportUndocumented.set(false)
+            // Suppress a packages
+            perPackageOption {
+                matchingRegex.set(/org\.webrtc.*/)
+                suppress.set(true)
+            }
+        }
+    }
 }
+
+groupId = project.ext.groupId
+
+apply from: "./audio.gradle"
 
