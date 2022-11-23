@@ -1,0 +1,102 @@
+name: Snapshot build
+
+on:
+  push:
+    branches-ignore:
+      - 'release-**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+
+      - uses: ./.github/actions/configure
+        with:
+          gpg-secret-key: ${{ secrets.OSSRH_GPG_SECRET_KEY }}
+          gpg-keyid-last8: ${{ secrets.OSSRH_GPG_KEY_ID_LAST_8 }}
+          gpg-secret-passphrase: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSPHRASE }}
+
+      - uses: ./.github/actions/version
+        id: version
+
+      - name: Debug environment set from above
+        run: |
+          echo "BETA_VERSION = $BETA_VERSION"
+          echo "AUDIO_SUFFIX = $AUDIO_SUFFIX"
+          echo "AUDIO_VERSION = $AUDIO_VERSION"
+          echo "AUDIO_CONFIGURED = $AUDIO_CONFIGURED"
+          echo "VERSION_CONFIGURED = $VERSION_CONFIGURED"
+
+      - name: Build and Install
+        id: build
+        run: |
+          ./gradlew -PAUDIO_SUFFIX=$AUDIO_SUFFIX :audio:assembleRelease :audiosample:assembleRelease :audio:publishToMavenLocal
+          mkdir -p ./repository
+          cp -r ~/.m2/repository/* ./repository
+          zip -r repository.zip ./repository
+
+      - name: Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: repository
+          path: repository.zip
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+
+      - uses: ./.github/actions/configure
+        with:
+          gpg-secret-key: ${{ secrets.OSSRH_GPG_SECRET_KEY }}
+          gpg-keyid-last8: ${{ secrets.OSSRH_GPG_KEY_ID_LAST_8 }}
+          gpg-secret-passphrase: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSPHRASE }}
+
+      - uses: ./.github/actions/version
+        id: version
+      
+      - name: Check mandatory variables
+        id: check
+        run: |
+          echo "${{ steps.version.outputs.audio }}"
+
+      - name: Create release
+        if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/beta/') }}
+        run: |
+          echo "sonatypeUsername=${{ secrets.OSSRH_USERNAME }}" >> gradle.properties
+          echo "sonatypePassword=${{ secrets.OSSRH_PASSWORD }}" >> gradle.properties
+          export branch="${{ github.ref }}"
+          ./gradlew -PAUDIO_SUFFIX=$AUDIO_SUFFIX :assembleAll
+          ./gradlew -PAUDIO_SUFFIX=$AUDIO_SUFFIX publishToSonatype closeAndReleaseStagingRepository
+
+      - name: Create Github's beta release
+        id: automatic_beta
+        if: startsWith(github.ref, 'refs/heads/beta/')
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "v${{ steps.version.outputs.audio }}"
+          prerelease: true
+          title: ${{ steps.version.outputs.audio }}
+
+      - name: Create Github's master release
+        id: automatic_master
+        if: github.ref == 'refs/heads/master'
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "v${{ steps.version.outputs.audio }}"
+          prerelease: false
+          title: ${{ steps.version.outputs.audio }}

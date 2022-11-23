@@ -1,0 +1,38 @@
+name: "Configure"
+description: "Configure the environment for multiple jobs"
+outputs:
+  audio:
+    description: "AudioSDK version available for non-env related"
+    value: ${{ steps.environment.outputs.audio }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check build for beta IN COMPOSITE
+      id: beta_configuration
+      shell: bash
+      if: startsWith(github.ref, 'refs/heads/beta/')
+      run: |
+        echo "building for beta..."
+        export message="${{ github.event.head_commit.message }}"
+        if [[ "$message" =~ (beta\.[[:digit:]]+) ]]; then
+          export AUDIO_SUFFIX="${BASH_REMATCH[1]}"
+          echo "AUDIO_SUFFIX=$AUDIO_SUFFIX" >> $GITHUB_ENV
+        else
+          echo "no beta.X pattern found in the commit generating this pipeline. Please update and retrigger a build"
+          exit 1
+        fi
+        echo "AUDIO_CONFIGURED='true'" >> $GITHUB_ENV
+
+    - name: Configure specific environment information IN COMPOSITE
+      id: environment
+      shell: bash
+      run: |
+        grep "version=" audio.gradle | cut -d'=' -f2 | sed "s/[^[:digit:][:alpha:]\.-]//g"
+        export AUDIO_VERSION=$(grep "version=" audio.gradle | cut -d'=' -f2 | sed "s/[^[:digit:][:alpha:]\.-]//g")
+        # replaces the AUDIO_VERSION with "version-suffix"
+        [ ! -z "$AUDIO_SUFFIX" ] && export AUDIO_VERSION=$AUDIO_VERSION-$AUDIO_SUFFIX
+        echo "will build $AUDIO_VERSION"
+        echo "audio=$AUDIO_VERSION" >> $GITHUB_OUTPUT
+        echo "AUDIO_VERSION=$AUDIO_VERSION" >> $GITHUB_ENV
+        echo "VERSION_CONFIGURED='true'" >> $GITHUB_ENV
