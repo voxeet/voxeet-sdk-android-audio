@@ -61,7 +61,7 @@ jobs:
 
     - name: Manual build
       run: |
-      ./gradlew :audio:assembleRelease :audiosample:assembleRelease
+        ./gradlew :audio:assembleRelease :audiosample:assembleRelease
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
