@@ -27,15 +27,40 @@ plugins {
 apply from: gradle.dolbyio.files.jacocoProject
 apply from: gradle.dolbyio.files.dependencyUpdates
 
-nexusPublishing {
-    repositories {
-        sonatype()
-    }
-}
-
 ext {
     ndkVersion = "21.4.7075529"
-    groupId = "com.voxeet.sdk"
+    groupId = "io.dolby"
+    pom = [
+        description: "Dolby.io Communications APIs library module",
+        inceptionYear: "${new Date().format("YYYY")}",
+        url: "https://github.com/voxeet/voxeet-sdk-android-audio",
+        license: [
+            name: 'Apache License',
+            url: 'https://github.com/voxeet/voxeet-sdk-android-audio/blob/main/LICENSE'
+        ],
+        developer: [
+            id: 'dolbyio',
+            name: 'Dolby.io',
+            email: 'support@dolby.io'
+        ],
+        scm: [
+            connection: 'scm:git:github.com/voxeet/voxeet-sdk-android-audio.git',
+            developerConnection: 'scm:git:ssh://github.com/voxeet/voxeet-sdk-android-audio.git',
+            url: 'https://github.com/voxeet/voxeet-sdk-android-audio/tree/main'
+        ]
+    ]
+}
+
+group = ext.groupId
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            // override default urls as default are oss.sonatype.org
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+        }
+    }
 }
 
 allprojects {
@@ -43,13 +68,6 @@ allprojects {
         google()
         mavenCentral()
         mavenLocal()
-        maven {
-            url "https://android-sdk.voxeet.com/release"
-            content {
-                includeGroup "com.voxeet.sdk"
-                //any other possible group with a new includeGroup line but as far as I remember I only created and set one group
-            }
-        }
     }
 
     tasks.withType(Javadoc) {
@@ -106,7 +124,4 @@ subprojects {
     }
 }
 
-groupId = project.ext.groupId
-
 apply from: "./audio.gradle"
-

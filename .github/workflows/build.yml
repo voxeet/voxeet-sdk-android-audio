@@ -78,7 +78,7 @@ jobs:
           echo "sonatypeUsername=${{ secrets.OSSRH_USERNAME }}" >> gradle.properties
           echo "sonatypePassword=${{ secrets.OSSRH_PASSWORD }}" >> gradle.properties
           export branch="${{ github.ref }}"
-          ./gradlew -PAUDIO_SUFFIX=$AUDIO_SUFFIX :assembleAll
+          ./gradlew -PAUDIO_SUFFIX=$AUDIO_SUFFIX :audio:assembleRelease
           ./gradlew -PAUDIO_SUFFIX=$AUDIO_SUFFIX publishToSonatype closeAndReleaseStagingRepository
 
       - name: Create Github's beta release
