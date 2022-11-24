@@ -1,5 +1,3 @@
-import org.jetbrains.dokka.gradle.DokkaTask
-
 buildscript {
     apply from: gradle.dolbyio.files.modules
 
@@ -92,35 +90,6 @@ subprojects {
 
     if (isSourcesModule(it)) {
         apply from: gradle.dolbyio.files.moduleSetup
-        apply from: gradle.dolbyio.files.ktlint
-        apply from: gradle.dolbyio.files.detekt
-    }
-
-    tasks.withType(DokkaTask).configureEach {
-        dokkaSourceSets.configureEach {
-            displayName.set("Android")
-            // Disable linking to online kotlin-stdlib documentation
-            noStdlibLink.set(false)
-            // Disable linking to online JDK documentation
-            noJdkLink.set(false)
-            // Disable linking to online Android documentation (only applicable for Android projects)
-            noAndroidSdkLink.set(false)
-            // Used for linking to JDK documentation
-            jdkVersion.set(11)
-            // Suppress obvious functions like default toString or equals.
-            suppressObviousFunctions.set(true)
-            // A set of visibility modifiers that should be documented
-            documentedVisibilities.set([
-                org.jetbrains.dokka.DokkaConfiguration.Visibility.PUBLIC
-            ].toSet())
-            // Emit warnings about not documented members. Applies globally, also can be overridden by packageOptions
-            reportUndocumented.set(false)
-            // Suppress a packages
-            perPackageOption {
-                matchingRegex.set(/org\.webrtc.*/)
-                suppress.set(true)
-            }
-        }
     }
 }
 

@@ -9,16 +9,6 @@ android {
     defaultConfig {
         testInstrumentationRunner "com.voxeet.audio.VoxeetRunner"
     }
-
-    /*testOptions {
-        unitTests.returnDefaultValues = true
-
-        unitTests.all {
-            jacoco {
-                includeNoLocationClasses = true
-            }
-        }
-    }*/
 }
 
 configurations {
@@ -33,8 +23,3 @@ dependencies {
 }
 
 apply from: gradle.dolbyio.files.publishing
-apply from: gradle.dolbyio.files.license
-apply from: gradle.dolbyio.files.sonarqube
-apply from: gradle.dolbyio.files.tasks
-apply from: gradle.dolbyio.files.jacoco
-apply from: gradle.dolbyio.files.dokka
