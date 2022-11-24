@@ -28,6 +28,7 @@ apply from: gradle.dolbyio.files.dependencyUpdates
 ext {
     ndkVersion = "21.4.7075529"
     groupId = "io.dolby"
+    publishWithSources = true
     pom = [
         description: "Dolby.io Communications APIs library module",
         inceptionYear: "${new Date().format("YYYY")}",
