@@ -2,5 +2,5 @@ def version_audio = { String version ->  project.hasProperty("AUDIO_SUFFIX") && 
         ? "${version}-${project.AUDIO_SUFFIX}"
         : "${version}" }
 
-def version="2.6.0"
+def version="2.6.1"
 rootProject.ext.version = version_audio(version)
