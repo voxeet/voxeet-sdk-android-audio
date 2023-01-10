@@ -1,6 +1,8 @@
 package com.voxeet.audiosample;
 
+import android.Manifest;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -95,8 +97,21 @@ public class MainActivity extends AppCompatActivity {
 
         handler = new Handler();
         handler.post(runnable);
-        if (shouldAskPermission()) {
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.RECORD_AUDIO}, 0x20);
+
+        List<String> permissions = new ArrayList();
+        permissions.add(Manifest.permission.RECORD_AUDIO);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
+        }
+
+        List<String> toAsk = new ArrayList();
+
+        for (String permission : permissions) {
+            if (shouldAskPermission(permission)) toAsk.add(permission);
+        }
+
+        if (toAsk.size() > 0) {
+            ActivityCompat.requestPermissions(this, toAsk.toArray(new String[0]), 0x20);
         }
 
         audioDeviceManager.enumerateDevices().then(devices -> {
@@ -174,9 +189,9 @@ public class MainActivity extends AppCompatActivity {
         updateViews();
     }
 
-    public boolean shouldAskPermission() {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.RECORD_AUDIO)) {
+    public boolean shouldAskPermission(String permission) {
+        if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
                 return true; //force a state where it has been asked hehe
             } else {
                 return true;
