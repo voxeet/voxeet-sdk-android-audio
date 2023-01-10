@@ -6,6 +6,7 @@ import androidx.annotation.Nullable;
 import com.voxeet.audio.utils.Log;
 import com.voxeet.audio2.devices.MediaDevice;
 import com.voxeet.audio2.devices.MediaDeviceConnectionWrapper;
+import com.voxeet.audio2.devices.description.LastConnectionStateType;
 import com.voxeet.promise.Promise;
 import com.voxeet.promise.solve.Solver;
 
@@ -28,17 +29,21 @@ public class ConnectScheduler {
         connectionWrapper = MediaDeviceConnectionWrapper.unique();
     }
 
-    public void pushConnect(MediaDevice mediaDevice, Solver<Boolean> solver) {
+    public void pushConnect(@NonNull MediaDevice mediaDevice,
+                            @NonNull LastConnectionStateType lastConnectionStateType,
+                            @NonNull Solver<Boolean> solver) {
         cancelAwaitingConnect();
         checkDisconnectPrevious(mediaDevice);
-        mediaDevices.add(new IOHolder(true, mediaDevice, solver));
+        mediaDevices.add(new IOHolder(true, mediaDevice, lastConnectionStateType, solver));
 
         tryIO();
     }
 
-    public void pushDisconnect(MediaDevice mediaDevice, Solver<Boolean> solver) {
+    public void pushDisconnect(@NonNull MediaDevice mediaDevice,
+                               @NonNull LastConnectionStateType lastConnectionStateType,
+                               @NonNull Solver<Boolean> solver) {
         checkDisconnectPrevious(mediaDevice);
-        mediaDevices.add(new IOHolder(false, mediaDevice, solver));
+        mediaDevices.add(new IOHolder(false, mediaDevice, lastConnectionStateType, solver));
 
         tryIO();
     }
@@ -46,7 +51,7 @@ public class ConnectScheduler {
     private void checkDisconnectPrevious(MediaDevice mediaDevice) {
         if (null != current && !current.id().equals(mediaDevice.id())) {
             Log.d(TAG, "ConnectSchedumer // checkDisconnectPrevious: push disconnecting current " + current.id());
-            mediaDevices.add(new IOHolder(false, current.mediaDevice, null));
+            mediaDevices.add(new IOHolder(false, current.mediaDevice, LastConnectionStateType.PROGRAMMATIC, null));
         }
     }
 
@@ -137,11 +142,18 @@ public class ConnectScheduler {
         @NonNull
         public MediaDevice mediaDevice;
 
+        @NonNull
+        public LastConnectionStateType lastConnectionStateType;
+
         @Nullable
         public Solver<Boolean> solver;
 
-        public IOHolder(boolean connect, @NonNull MediaDevice mediaDevice, @Nullable Solver<Boolean> solver) {
+        public IOHolder(boolean connect,
+                        @NonNull MediaDevice mediaDevice,
+                        @NonNull LastConnectionStateType lastConnectionStateType,
+                        @Nullable Solver<Boolean> solver) {
             this.connect = connect;
+            this.lastConnectionStateType = lastConnectionStateType;
             this.mediaDevice = mediaDevice;
             this.solver = solver;
         }

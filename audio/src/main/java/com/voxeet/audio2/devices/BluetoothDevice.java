@@ -15,6 +15,7 @@ import com.voxeet.audio.utils.__Call;
 import com.voxeet.audio2.devices.description.ConnectionState;
 import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.description.IMediaDeviceConnectionState;
+import com.voxeet.audio2.devices.description.LastConnectionStateType;
 import com.voxeet.audio2.manager.BluetoothHeadsetDeviceManager;
 import com.voxeet.promise.Promise;
 import com.voxeet.promise.solve.Solver;
@@ -63,7 +64,7 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
     protected Promise<Boolean> connect() {
         return new Promise<>(solver -> {
             setActive.apply(BluetoothDevice.this);
-            setConnectionState(ConnectionState.CONNECTING);
+            setConnectionState(ConnectionState.CONNECTING, LastConnectionStateType.PROGRAMMATIC);
             new Promise<Boolean>(second -> {
                 postTimeout(second);
                 Log.d(id(), "call for apply connect... sco:=" + bluetoothHeadsetDeviceManager.isSCOOn());
@@ -87,12 +88,12 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
             }).then(b -> {
                 cancelRunnable();
                 Log.d(id(), "connect done");
-                setConnectionState(ConnectionState.CONNECTED);
+                setConnectionState(ConnectionState.CONNECTED, LastConnectionStateType.PROGRAMMATIC);
                 solver.resolve(true);
             }).error(err -> {
                 cancelRunnable();
                 Log.d(id(), "connect done with error");
-                setConnectionState(ConnectionState.DISCONNECTED);
+                setConnectionState(ConnectionState.DISCONNECTED, LastConnectionStateType.PROGRAMMATIC);
                 solver.resolve(true);
             });
         });
@@ -102,7 +103,7 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
     @Override
     protected Promise<Boolean> disconnect() {
         return new Promise<>(solver -> {
-            setConnectionState(ConnectionState.DISCONNECTING);
+            setConnectionState(ConnectionState.DISCONNECTING, LastConnectionStateType.PROGRAMMATIC);
             new Promise<Boolean>(second -> {
                 postTimeout(second);
                 if (!ConnectionState.DISCONNECTED.equals(platformConnectionState)) {
@@ -122,13 +123,13 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
                 Log.d(id(), "disconnect done");
                 return mode.abandonAudioFocus();
             }).then(b -> {
-                setConnectionState(ConnectionState.DISCONNECTED);
+                setConnectionState(ConnectionState.DISCONNECTED, LastConnectionStateType.PROGRAMMATIC);
                 solver.resolve(true);
                 onDisconnected.apply(BluetoothDevice.this);
             }).error(err -> {
                 cancelRunnable();
                 final Runnable run = () -> {
-                    setConnectionState(ConnectionState.DISCONNECTED);
+                    setConnectionState(ConnectionState.DISCONNECTED, LastConnectionStateType.PROGRAMMATIC);
                     solver.resolve(true);
                 };
                 Log.d(id(), "disconnect done with error");

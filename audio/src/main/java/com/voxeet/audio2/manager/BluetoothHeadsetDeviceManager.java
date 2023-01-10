@@ -19,6 +19,7 @@ import com.voxeet.audio2.devices.PlatformDeviceConnectionWrapper;
 import com.voxeet.audio2.devices.description.ConnectionState;
 import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.description.IMediaDeviceConnectionState;
+import com.voxeet.audio2.devices.description.LastConnectionStateType;
 import com.voxeet.audio2.manager.bluetooth.BluetoothAction;
 import com.voxeet.audio2.manager.bluetooth.BluetoothDeviceReceiver;
 import com.voxeet.audio2.manager.bluetooth.BluetoothDisconnectListener;
@@ -50,7 +51,7 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
     private BluetoothDevice active;
     private Runnable runnable;
     private Handler handler;
-    private final AudioDeviceManager audioDeviceManager;
+    private final AudioDeviceManagerProxy audioDeviceManagerProxy;
 
     private SystemAudioManager systemAudioManager;
     private BluetoothHeadsetServiceListener bluetoothHeadsetServiceListener;
@@ -63,12 +64,12 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
 
     public BluetoothHeadsetDeviceManager(
             @NonNull Context context,
-            @NonNull AudioDeviceManager audioDeviceManager,
+            @NonNull AudioDeviceManagerProxy audioDeviceManagerProxy,
             @NonNull SystemAudioManager systemAudioManager,
             @NonNull __Call<List<BluetoothDevice>> connectivityUpdate,
             @NonNull IMediaDeviceConnectionState connectionState) {
         this.context = context;
-        this.audioDeviceManager = audioDeviceManager;
+        this.audioDeviceManagerProxy = audioDeviceManagerProxy;
         this.systemAudioManager = systemAudioManager;
         this.connectivityUpdate = connectivityUpdate;
         this.connectionState = connectionState;
@@ -206,7 +207,7 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
                 case DEVICE_ACTIVE_CHANGED:
                     if (active != null && device == null) {
                         Log.d(TAG, "switch to disconnected device ... disconnect");
-                        audioDeviceManager.disconnect(active)
+                        audioDeviceManagerProxy.disconnect(active, LastConnectionStateType.SYSTEM)
                                 .then((ThenVoid<Boolean>) done -> Log.d(TAG, "disconnect done for this device"))
                                 .error(Throwable::printStackTrace);
                     }
@@ -218,11 +219,11 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
                 case DEVICE_DISCONNECTED:
                     wrapper.setPlatformConnectionState(ConnectionState.DISCONNECTED);
                     if (null != device) {
-                        audioDeviceManager.current()
+                        audioDeviceManagerProxy.current()
                                 .then((ThenPromise<MediaDevice, Boolean>) mediaDevice -> {
                                     if (null == mediaDevice) return Promise.resolve(true);
                                     if (mediaDevice.id().equals(device.id()))
-                                        return audioDeviceManager.disconnect(device);
+                                        return audioDeviceManagerProxy.disconnect(device, LastConnectionStateType.SYSTEM);
                                     return Promise.resolve(true);
                                 })
                                 .then(result -> {
@@ -331,7 +332,6 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
                     need_disconnection = true;
                     break;
                 default:
-
             }
 
             if (need_disconnection) {
@@ -340,7 +340,7 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
                 PlatformDeviceConnectionWrapper wrapper = wrappers.get(id);
                 try {
                     wrapper.setPlatformConnectionState(ConnectionState.DISCONNECTED);
-                    audioDeviceManager.disconnect(device).execute();
+                    audioDeviceManagerProxy.disconnect(device, LastConnectionStateType.SYSTEM).execute();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

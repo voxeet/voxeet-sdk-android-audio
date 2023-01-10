@@ -12,6 +12,8 @@ import com.voxeet.audio2.devices.WiredDevice;
 import com.voxeet.audio2.devices.description.ConnectionState;
 import com.voxeet.audio2.devices.description.ConnectionStatesEvent;
 import com.voxeet.audio2.devices.description.DeviceType;
+import com.voxeet.audio2.devices.description.LastConnectionStateType;
+import com.voxeet.audio2.manager.AudioDeviceManagerProxy;
 import com.voxeet.audio2.manager.BluetoothHeadsetDeviceManager;
 import com.voxeet.audio2.manager.ConnectScheduler;
 import com.voxeet.audio2.manager.IDeviceManager;
@@ -34,6 +36,30 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
     private WiredHeadsetDeviceManager wiredHeadsetDeviceManager;
     private BluetoothHeadsetDeviceManager bluetoothHeadsetDeviceManager;
 
+    private AudioDeviceManagerProxy audioDeviceManagerProxy = new AudioDeviceManagerProxy() {
+        @NonNull
+        @Override
+        public Promise<MediaDevice> current() {
+            return AudioDeviceManager.this.current();
+        }
+
+        @NonNull
+        @Override
+        public Promise<Boolean> connect(@NonNull MediaDevice mediaDevice, @NonNull LastConnectionStateType lastConnectionStateType) {
+            return new Promise<>((solver) -> connectScheduler.waitFor()
+                    .then((ThenVoid<ConnectScheduler>) connectScheduler -> connectScheduler.pushConnect(mediaDevice, lastConnectionStateType, solver))
+                    .error(Throwable::printStackTrace));
+        }
+
+        @NonNull
+        @Override
+        public Promise<Boolean> disconnect(@NonNull MediaDevice mediaDevice, @NonNull LastConnectionStateType lastConnectionStateType) {
+            return new Promise<>((solver) -> connectScheduler.waitFor()
+                    .then((ThenVoid<ConnectScheduler>) connectScheduler -> connectScheduler.pushDisconnect(mediaDevice, lastConnectionStateType, solver))
+                    .error(Throwable::printStackTrace));
+        }
+    };
+
     private AudioDeviceManager() {
 
     }
@@ -42,9 +68,10 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
                               @NonNull __Call<Promise<List<MediaDevice>>> update) {
         systemAudioManager = new SystemAudioManager(context);
         this.update = update;
+
         systemDeviceManager = new SystemDeviceManager(systemAudioManager, this::onConnectionState);
         wiredHeadsetDeviceManager = new WiredHeadsetDeviceManager(context, systemAudioManager, this::onWiredHeadsetDeviceConnected, this::onConnectionState);
-        bluetoothHeadsetDeviceManager = new BluetoothHeadsetDeviceManager(context, this, systemAudioManager, (r) -> this.sendUpdate(), this::onConnectionState);
+        bluetoothHeadsetDeviceManager = new BluetoothHeadsetDeviceManager(context, audioDeviceManagerProxy, systemAudioManager, (r) -> this.sendUpdate(), this::onConnectionState);
         connectScheduler = new ConnectScheduler();
     }
 
@@ -85,7 +112,7 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
                 systemDeviceManager.enumerateDevices(),
                 wiredHeadsetDeviceManager.enumerateDevices(),
                 bluetoothHeadsetDeviceManager.enumerateDevices()
-        ).then((result, solver) -> {
+        ).then(result -> {
             List<MediaDevice> list = new ArrayList<>();
             for (List<MediaDevice> mediaDevices : __Opt.of(result).or(new ArrayList<>())) {
                 if (null != mediaDevices) list.addAll(mediaDevices);
@@ -125,20 +152,12 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
 
     @NonNull
     public Promise<Boolean> connect(@NonNull MediaDevice mediaDevice) {
-        return new Promise<>((solver) -> {
-            connectScheduler.waitFor()
-                    .then((ThenVoid<ConnectScheduler>) connectScheduler -> connectScheduler.pushConnect(mediaDevice, solver))
-                    .error(Throwable::printStackTrace);
-        });
+        return audioDeviceManagerProxy.connect(mediaDevice, LastConnectionStateType.PROGRAMMATIC);
     }
 
     @NonNull
     public Promise<Boolean> disconnect(@NonNull MediaDevice mediaDevice) {
-        return new Promise<>((solver) -> {
-            connectScheduler.waitFor()
-                    .then((ThenVoid<ConnectScheduler>) connectScheduler -> connectScheduler.pushDisconnect(mediaDevice, solver))
-                    .error(Throwable::printStackTrace);
-        });
+        return audioDeviceManagerProxy.disconnect(mediaDevice, LastConnectionStateType.PROGRAMMATIC);
     }
 
     /**
@@ -201,7 +220,7 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
 
                 if (current_attemps.size() > 0) {
                     Log.d(TAG, "some in-call devices where already pending, we are then connecting the wired headset");
-                    solver.resolve(connect(finalHeadset));
+                    solver.resolve(audioDeviceManagerProxy.connect(finalHeadset, LastConnectionStateType.SYSTEM));
                 } else {
                     Log.d(TAG, "no devices where active, we skip connecting to wire, we are in normal mode, WARNING : it currently does not check the queue, please act accordingly");
                     solver.resolve(true);
@@ -209,7 +228,7 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
             }).error(error -> solver.resolve(false)));
         } else {
             Log.d(TAG, "onWiredDeviceConnected ? disconnected : will disconnect");
-            promise = disconnect(headset);
+            promise = audioDeviceManagerProxy.disconnect(headset, LastConnectionStateType.SYSTEM);
         }
 
         promise.then(aBoolean -> {

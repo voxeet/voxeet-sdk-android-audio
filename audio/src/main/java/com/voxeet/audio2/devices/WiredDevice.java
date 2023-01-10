@@ -12,6 +12,7 @@ import com.voxeet.audio.mode.WiredMode;
 import com.voxeet.audio2.devices.description.ConnectionState;
 import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.description.IMediaDeviceConnectionState;
+import com.voxeet.audio2.devices.description.LastConnectionStateType;
 import com.voxeet.promise.Promise;
 import com.voxeet.promise.solve.ThenPromise;
 
@@ -47,13 +48,13 @@ public class WiredDevice extends MediaDevice<DeviceType> {
     @Override
     protected Promise<Boolean> connect() {
         return new Promise<>(solver -> {
-            setConnectionState(ConnectionState.CONNECTING);
+            setConnectionState(ConnectionState.CONNECTING, LastConnectionStateType.PROGRAMMATIC);
             mode.apply(false).then(aBoolean -> {
-                setConnectionState(ConnectionState.CONNECTED);
+                setConnectionState(ConnectionState.CONNECTED, LastConnectionStateType.PROGRAMMATIC);
                 solver.resolve(true);
             }).error(error -> {
                 error.printStackTrace();
-                setConnectionState(ConnectionState.DISCONNECTED);
+                setConnectionState(ConnectionState.DISCONNECTED, LastConnectionStateType.PROGRAMMATIC);
                 solver.reject(error);
             });
         });
@@ -63,17 +64,17 @@ public class WiredDevice extends MediaDevice<DeviceType> {
     @Override
     protected Promise<Boolean> disconnect() {
         return new Promise<>(solver -> {
-            setConnectionState(ConnectionState.DISCONNECTING);
-            mode.apply(false).then((ThenPromise<Boolean, Boolean>) aBoolean -> {
-                return normalMode.abandonAudioFocus();
-            }).then(aBoolean -> {
-                setConnectionState(ConnectionState.DISCONNECTED);
-                solver.resolve(true);
-            }).error(error -> {
-                error.printStackTrace();
-                setConnectionState(ConnectionState.DISCONNECTED);
-                solver.resolve(false);
-            });
+            setConnectionState(ConnectionState.DISCONNECTING, LastConnectionStateType.PROGRAMMATIC);
+            mode.apply(false)
+                    .then((ThenPromise<Boolean, Boolean>) aBoolean -> normalMode.abandonAudioFocus())
+                    .then(aBoolean -> {
+                        setConnectionState(ConnectionState.DISCONNECTED, LastConnectionStateType.PROGRAMMATIC);
+                        solver.resolve(true);
+                    }).error(error -> {
+                        error.printStackTrace();
+                        setConnectionState(ConnectionState.DISCONNECTED, LastConnectionStateType.PROGRAMMATIC);
+                        solver.resolve(false);
+                    });
         });
     }
 

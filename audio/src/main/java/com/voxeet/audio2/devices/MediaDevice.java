@@ -8,6 +8,7 @@ import com.voxeet.audio2.devices.description.ConnectionState;
 import com.voxeet.audio2.devices.description.ConnectionStatesEvent;
 import com.voxeet.audio2.devices.description.DeviceType;
 import com.voxeet.audio2.devices.description.IMediaDeviceConnectionState;
+import com.voxeet.audio2.devices.description.LastConnectionStateType;
 import com.voxeet.promise.Promise;
 
 public abstract class MediaDevice<TYPE> {
@@ -31,6 +32,9 @@ public abstract class MediaDevice<TYPE> {
     protected ConnectionState connectionState;
 
     @NonNull
+    protected LastConnectionStateType lastConnectionStateType;
+
+    @NonNull
     protected ConnectionState platformConnectionState;
 
     protected MediaDevice(@NonNull IMediaDeviceConnectionState mediaDeviceConnectionState,
@@ -52,6 +56,7 @@ public abstract class MediaDevice<TYPE> {
                           @Nullable TYPE holder,
                           @Nullable String name) {
         connectionState = ConnectionState.DISCONNECTED;
+        lastConnectionStateType = LastConnectionStateType.SYSTEM;
         platformConnectionState = ConnectionState.CONNECTED;
         this.mediaDeviceConnectionState = mediaDeviceConnectionState;
         this.id = id;
@@ -76,9 +81,11 @@ public abstract class MediaDevice<TYPE> {
         return deviceType;
     }
 
-    void setConnectionState(@NonNull ConnectionState connectionState) {
+    void setConnectionState(@NonNull ConnectionState connectionState,
+                            @NonNull LastConnectionStateType lastConnectionStateType) {
         Log.d(MediaDevice.class.getSimpleName(), "setConnectionState: " + id() + " " + connectionState);
         this.connectionState = connectionState;
+        this.lastConnectionStateType = lastConnectionStateType;
         mediaDeviceConnectionState.onConnectionState(new ConnectionStatesEvent(connectionState, platformConnectionState, this));
     }
 
@@ -91,6 +98,11 @@ public abstract class MediaDevice<TYPE> {
     @NonNull
     public ConnectionState connectionState() {
         return connectionState;
+    }
+
+    @NonNull
+    public LastConnectionStateType lastConnectionStateType() {
+        return lastConnectionStateType;
     }
 
     @NonNull
