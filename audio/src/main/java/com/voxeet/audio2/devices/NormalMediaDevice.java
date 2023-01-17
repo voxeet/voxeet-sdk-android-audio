@@ -35,14 +35,14 @@ public class NormalMediaDevice extends MediaDevice<DeviceType> {
 
     @NonNull
     @Override
-    protected Promise<Boolean> connect() {
+    protected Promise<Boolean> connect(@NonNull LastConnectionStateType lastConnectionStateType) {
         return new Promise<>(solver -> {
-            setConnectionState(ConnectionState.CONNECTING, LastConnectionStateType.PROGRAMMATIC);
+            setConnectionState(ConnectionState.CONNECTING, lastConnectionStateType);
             mode.apply(false).then(aBoolean -> {
-                setConnectionState(ConnectionState.CONNECTED, LastConnectionStateType.PROGRAMMATIC);
+                setConnectionState(ConnectionState.CONNECTED, lastConnectionStateType);
                 solver.resolve(true);
             }).error(error -> {
-                setConnectionState(ConnectionState.DISCONNECTED, LastConnectionStateType.PROGRAMMATIC);
+                setConnectionState(ConnectionState.DISCONNECTED, lastConnectionStateType);
                 solver.reject(error);
             });
         });
@@ -50,14 +50,14 @@ public class NormalMediaDevice extends MediaDevice<DeviceType> {
 
     @NonNull
     @Override
-    protected Promise<Boolean> disconnect() {
+    protected Promise<Boolean> disconnect(@NonNull LastConnectionStateType lastConnectionStateType) {
         return new Promise<>(solver -> {
-            setConnectionState(ConnectionState.DISCONNECTING, LastConnectionStateType.PROGRAMMATIC);
+            setConnectionState(ConnectionState.DISCONNECTING, lastConnectionStateType);
             mode.apply(false).then(aBoolean -> {
-                setConnectionState(ConnectionState.DISCONNECTED, LastConnectionStateType.PROGRAMMATIC);
+                setConnectionState(ConnectionState.DISCONNECTED, lastConnectionStateType);
                 solver.resolve(true);
             }).error(error -> {
-                setConnectionState(ConnectionState.DISCONNECTED, LastConnectionStateType.PROGRAMMATIC);
+                setConnectionState(ConnectionState.DISCONNECTED, lastConnectionStateType);
                 solver.resolve(false);
             });
         });

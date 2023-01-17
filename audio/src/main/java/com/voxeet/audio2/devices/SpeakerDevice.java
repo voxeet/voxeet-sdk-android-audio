@@ -36,16 +36,16 @@ public class SpeakerDevice extends MediaDevice<DeviceType> {
 
     @NonNull
     @Override
-    protected Promise<Boolean> connect() {
+    protected Promise<Boolean> connect(@NonNull LastConnectionStateType lastConnectionStateType) {
         return new Promise<>(solver -> {
-            setConnectionState(ConnectionState.CONNECTING, LastConnectionStateType.PROGRAMMATIC);
+            setConnectionState(ConnectionState.CONNECTING, lastConnectionStateType);
             speakerMode.apply(true).then(aBoolean -> {
-                Log.d(SpeakerDevice.class.getSimpleName(), "error");
-                setConnectionState(ConnectionState.CONNECTED, LastConnectionStateType.PROGRAMMATIC);
+                Log.d(SpeakerDevice.class.getSimpleName(), "done");
+                setConnectionState(ConnectionState.CONNECTED, lastConnectionStateType);
                 solver.resolve(true);
             }).error(error -> {
                 Log.d(SpeakerDevice.class.getSimpleName(), "error");
-                setConnectionState(ConnectionState.DISCONNECTED, LastConnectionStateType.PROGRAMMATIC);
+                setConnectionState(ConnectionState.DISCONNECTED, lastConnectionStateType);
                 solver.reject(error);
             });
         });
@@ -53,14 +53,14 @@ public class SpeakerDevice extends MediaDevice<DeviceType> {
 
     @NonNull
     @Override
-    protected Promise<Boolean> disconnect() {
+    protected Promise<Boolean> disconnect(@NonNull LastConnectionStateType lastConnectionStateType) {
         return new Promise<>(solver -> {
-            setConnectionState(ConnectionState.DISCONNECTING, LastConnectionStateType.PROGRAMMATIC);
+            setConnectionState(ConnectionState.DISCONNECTING, lastConnectionStateType);
             speakerMode.apply(false).then(aBoolean -> {
-                setConnectionState(ConnectionState.DISCONNECTED, LastConnectionStateType.PROGRAMMATIC);
+                setConnectionState(ConnectionState.DISCONNECTED, lastConnectionStateType);
                 solver.resolve(true);
             }).error(error -> {
-                setConnectionState(ConnectionState.DISCONNECTED, LastConnectionStateType.PROGRAMMATIC);
+                setConnectionState(ConnectionState.DISCONNECTED, lastConnectionStateType);
                 solver.resolve(false);
             });
         });

@@ -27,7 +27,6 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
     private final __Call<BluetoothDeviceConnectionWrapper> waitForSolver;
     private final __Call<BluetoothDevice> setActive;
     private final BluetoothHeadsetDeviceManager bluetoothHeadsetDeviceManager;
-    private final __Call<BluetoothDevice> onDisconnected;
     @NonNull
     private AudioManager audioManager;
     private AudioFocusManager audioFocusManagerCall = new AudioFocusManager(AudioFocusMode.CALL);
@@ -45,15 +44,13 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
             @NonNull android.bluetooth.BluetoothDevice bluetoothDevice,
             @NonNull __Call<PlatformDeviceConnectionWrapper> wrapper,
             @NonNull __Call<BluetoothDeviceConnectionWrapper> waitForSolver,
-            @NonNull __Call<BluetoothDevice> setActive,
-            @NonNull __Call<BluetoothDevice> onDisconnected) {
+            @NonNull __Call<BluetoothDevice> setActive) {
         super(connectionState, deviceType, bluetoothDevice.getAddress(), bluetoothDevice, bluetoothDevice.getName());
 
         this.bluetoothHeadsetDeviceManager = bluetoothHeadsetDeviceManager;
         this.setActive = setActive;
         this.waitForSolver = waitForSolver;
         this.audioManager = audioManager;
-        this.onDisconnected = onDisconnected;
         normalMode = new NormalMode(audioManager, audioFocusManagerCall);
         mode = new BluetoothMode(audioManager, audioFocusManagerCall);
         wrapper.apply(BluetoothDevice.this::setPlatformConnectionState);
@@ -61,10 +58,10 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
 
     @NonNull
     @Override
-    protected Promise<Boolean> connect() {
+    protected Promise<Boolean> connect(@NonNull LastConnectionStateType lastConnectionStateType) {
         return new Promise<>(solver -> {
             setActive.apply(BluetoothDevice.this);
-            setConnectionState(ConnectionState.CONNECTING, LastConnectionStateType.PROGRAMMATIC);
+            setConnectionState(ConnectionState.CONNECTING, lastConnectionStateType);
             new Promise<Boolean>(second -> {
                 postTimeout(second);
                 Log.d(id(), "call for apply connect... sco:=" + bluetoothHeadsetDeviceManager.isSCOOn());
@@ -88,12 +85,12 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
             }).then(b -> {
                 cancelRunnable();
                 Log.d(id(), "connect done");
-                setConnectionState(ConnectionState.CONNECTED, LastConnectionStateType.PROGRAMMATIC);
+                setConnectionState(ConnectionState.CONNECTED, lastConnectionStateType);
                 solver.resolve(true);
             }).error(err -> {
                 cancelRunnable();
                 Log.d(id(), "connect done with error");
-                setConnectionState(ConnectionState.DISCONNECTED, LastConnectionStateType.PROGRAMMATIC);
+                setConnectionState(ConnectionState.DISCONNECTED, lastConnectionStateType);
                 solver.resolve(true);
             });
         });
@@ -101,9 +98,9 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
 
     @NonNull
     @Override
-    protected Promise<Boolean> disconnect() {
+    protected Promise<Boolean> disconnect(@NonNull LastConnectionStateType lastConnectionStateType) {
         return new Promise<>(solver -> {
-            setConnectionState(ConnectionState.DISCONNECTING, LastConnectionStateType.PROGRAMMATIC);
+            setConnectionState(ConnectionState.DISCONNECTING, lastConnectionStateType);
             new Promise<Boolean>(second -> {
                 postTimeout(second);
                 if (!ConnectionState.DISCONNECTED.equals(platformConnectionState)) {
@@ -123,13 +120,12 @@ public class BluetoothDevice extends MediaDevice<android.bluetooth.BluetoothDevi
                 Log.d(id(), "disconnect done");
                 return mode.abandonAudioFocus();
             }).then(b -> {
-                setConnectionState(ConnectionState.DISCONNECTED, LastConnectionStateType.PROGRAMMATIC);
+                setConnectionState(ConnectionState.DISCONNECTED, lastConnectionStateType);
                 solver.resolve(true);
-                onDisconnected.apply(BluetoothDevice.this);
             }).error(err -> {
                 cancelRunnable();
                 final Runnable run = () -> {
-                    setConnectionState(ConnectionState.DISCONNECTED, LastConnectionStateType.PROGRAMMATIC);
+                    setConnectionState(ConnectionState.DISCONNECTED, lastConnectionStateType);
                     solver.resolve(true);
                 };
                 Log.d(id(), "disconnect done with error");

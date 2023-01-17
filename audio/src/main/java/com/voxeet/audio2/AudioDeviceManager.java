@@ -94,7 +94,7 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
         Log.d(TAG, ">>>>>>>>>>>>>>>>>>>>>>>>>>>");
         Log.d(TAG, "enumeraDevices");
         for (MediaDevice device : list) {
-            Log.d(TAG, "device " + device.id() + " " + device.connectionState());
+            Log.d(TAG, "device " + device.id() + " " + device.deviceType()  + " " + device.connectionState() + " " + device.lastConnectionStateType() + " " + device.platformConnectionState());
         }
         Log.d(TAG, "<<<<<<<<<<<<<<<<<<<<<<<<<<<");
     }

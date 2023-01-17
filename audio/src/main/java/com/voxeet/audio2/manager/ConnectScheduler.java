@@ -63,8 +63,8 @@ public class ConnectScheduler {
             Log.d(TAG, "STARTING --> " + holder.mediaDevice.id());
 
             Promise<Boolean> promise;
-            if (holder.connect) promise = connectionWrapper.connect(holder.mediaDevice);
-            else promise = connectionWrapper.disconnect(holder.mediaDevice);
+            if (holder.connect) promise = connectionWrapper.connect(holder.mediaDevice, holder.lastConnectionStateType);
+            else promise = connectionWrapper.disconnect(holder.mediaDevice, holder.lastConnectionStateType);
 
             final Solver<Boolean> solver = holder.solver;
 

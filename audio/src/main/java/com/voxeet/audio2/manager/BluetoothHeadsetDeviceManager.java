@@ -228,6 +228,7 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
                                 })
                                 .then(result -> {
                                     Log.d(TAG, "disconnecting the connect device because it was the main one");
+                                    onDisconnected(device);
                                 }).error(Throwable::printStackTrace);
                     }
                     break;
@@ -264,8 +265,7 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
                         device,
                         wrapper -> wrappers.put(device.getAddress(), wrapper),
                         wrapper -> waitingConnectivity.put(device.getAddress(), wrapper),
-                        this::setActiveDevice,
-                        this::onDisconnected);
+                        this::setActiveDevice);
                 list.add(in_list);
             }
         }
@@ -341,6 +341,7 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
                 try {
                     wrapper.setPlatformConnectionState(ConnectionState.DISCONNECTED);
                     audioDeviceManagerProxy.disconnect(device, LastConnectionStateType.SYSTEM).execute();
+                    onDisconnected(device);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

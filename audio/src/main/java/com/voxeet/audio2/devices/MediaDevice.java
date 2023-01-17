@@ -56,7 +56,7 @@ public abstract class MediaDevice<TYPE> {
                           @Nullable TYPE holder,
                           @Nullable String name) {
         connectionState = ConnectionState.DISCONNECTED;
-        lastConnectionStateType = LastConnectionStateType.SYSTEM;
+        lastConnectionStateType = LastConnectionStateType.PROGRAMMATIC;
         platformConnectionState = ConnectionState.CONNECTED;
         this.mediaDeviceConnectionState = mediaDeviceConnectionState;
         this.id = id;
@@ -83,14 +83,14 @@ public abstract class MediaDevice<TYPE> {
 
     void setConnectionState(@NonNull ConnectionState connectionState,
                             @NonNull LastConnectionStateType lastConnectionStateType) {
-        Log.d(MediaDevice.class.getSimpleName(), "setConnectionState: " + id() + " " + connectionState);
+        Log.d(MediaDevice.class.getSimpleName(), "setConnectionState: " + id() + " " + connectionState + " " + lastConnectionStateType);
         this.connectionState = connectionState;
         this.lastConnectionStateType = lastConnectionStateType;
         mediaDeviceConnectionState.onConnectionState(new ConnectionStatesEvent(connectionState, platformConnectionState, this));
     }
 
     protected void setPlatformConnectionState(@NonNull ConnectionState platformConnectionState) {
-        Log.d(MediaDevice.class.getSimpleName(), "setPlatformConnectionState: " + id() + " " + connectionState);
+        Log.d(MediaDevice.class.getSimpleName(), "setPlatformConnectionState: " + id() + " " + platformConnectionState);
         this.platformConnectionState = platformConnectionState;
         mediaDeviceConnectionState.onConnectionState(new ConnectionStatesEvent(connectionState, platformConnectionState, this));
     }
@@ -111,9 +111,20 @@ public abstract class MediaDevice<TYPE> {
     }
 
     @NonNull
-    protected abstract Promise<Boolean> connect();
+    protected abstract Promise<Boolean> connect(@NonNull LastConnectionStateType lastConnectionStateType);
 
     @NonNull
-    protected abstract Promise<Boolean> disconnect();
+    protected abstract Promise<Boolean> disconnect(@NonNull LastConnectionStateType lastConnectionStateType);
 
+    @Override
+    public String toString() {
+        return "MediaDevice{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", deviceType=" + deviceType +
+                ", connectionState=" + connectionState +
+                ", lastConnectionStateTYpe=" + lastConnectionStateType +
+                ", platformConnectionState=" + platformConnectionState +
+                '}';
+    }
 }
