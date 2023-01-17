@@ -36,6 +36,7 @@ public class SpeakerMode extends AbstractMode {
     public Promise<Boolean> requestAudioFocus() {
         return new Promise<>(solver -> {
             forceVolumeControlStream(requestFocus);
+            Log.d("SpeakerMode", "requestAudioFocus requestFocus " + requestFocus);
             audioFocusManger.requestAudioFocus(manager, requestFocus).then(integer -> {
                 solver.resolve(true);
             }).error(solver::reject);

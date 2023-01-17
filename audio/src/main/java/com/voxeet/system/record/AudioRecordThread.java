@@ -143,7 +143,9 @@ public class AudioRecordThread extends Thread {
 
         try {
             if (null != countDownLatch && started) {
-                countDownLatch.await(MicrophoneRecord.AUDIO_RECORD_THREAD_JOIN_TIMEOUT_MS, TimeUnit.SECONDS);
+                if (!countDownLatch.await(MicrophoneRecord.AUDIO_RECORD_THREAD_JOIN_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                    Log.w(TAG, "stopThread timeout after " + MicrophoneRecord.AUDIO_RECORD_THREAD_JOIN_TIMEOUT_MS + "ms");
+                }
             }
         } catch (InterruptedException e) {
             e.printStackTrace();

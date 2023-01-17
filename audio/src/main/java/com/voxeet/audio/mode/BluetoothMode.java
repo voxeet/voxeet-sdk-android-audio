@@ -10,6 +10,7 @@ import com.voxeet.audio.MediaDevice;
 import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.audio.focus.AudioFocusManagerAsync;
 import com.voxeet.audio.utils.Constants;
+import com.voxeet.audio.utils.Log;
 import com.voxeet.promise.Promise;
 import com.voxeet.promise.solve.ThenPromise;
 
@@ -38,6 +39,7 @@ public class BluetoothMode extends AbstractMode {
     public Promise<Boolean> requestAudioFocus() {
         return new Promise<>(solver -> {
             forceVolumeControlStream(Constants.STREAM_BLUETOOTH_SCO | requestFocus);
+            Log.d("BluetoothMode", "requestAudioFocus requestFocus " + (Constants.STREAM_BLUETOOTH_SCO | requestFocus));
             audioFocusManger.requestAudioFocus(manager, Constants.STREAM_BLUETOOTH_SCO | requestFocus)
                     .then(integer -> {
                         solver.resolve(true);

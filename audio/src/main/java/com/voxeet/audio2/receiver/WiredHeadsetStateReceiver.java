@@ -26,9 +26,9 @@ public class WiredHeadsetStateReceiver extends BroadcastReceiver {
         if (null == action) action = "";
         switch (action) {
             case Intent.ACTION_HEADSET_PLUG:
-                Log.d(TAG, "onReceive: headset plug");
                 int state = intent.getIntExtra("state", -1);
                 int has_mic = intent.getIntExtra("microphone", -1);
+                Log.d(TAG, "onReceive: headset plug " + ((state==0)? "DISCONNECTED" : "CONNECTED"));
 
                 WiredInformation information = new WiredInformation(has_mic > 0, state);
                 update.apply(information);

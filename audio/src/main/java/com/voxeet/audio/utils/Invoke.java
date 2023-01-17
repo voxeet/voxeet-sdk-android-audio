@@ -17,11 +17,7 @@ public class Invoke {
                 Object result = method.invoke(object);
                 return (int) result;
             }
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
         return defaultValue;
@@ -32,11 +28,7 @@ public class Invoke {
             Method method = object.getClass().getDeclaredMethod(methodName, int.class);
 
             method.invoke(object, parameter);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
     }

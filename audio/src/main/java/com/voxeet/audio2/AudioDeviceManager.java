@@ -25,6 +25,7 @@ import com.voxeet.promise.solve.ThenVoid;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
 
@@ -117,6 +118,9 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
             for (List<MediaDevice> mediaDevices : __Opt.of(result).or(new ArrayList<>())) {
                 if (null != mediaDevices) list.addAll(mediaDevices);
             }
+
+            // Remove platform DISCONNECTED devices
+            list = list.stream().filter(d -> d.platformConnectionState() != ConnectionState.DISCONNECTED).collect(Collectors.toList());
 
             dump(list);
 
@@ -218,7 +222,7 @@ public class AudioDeviceManager implements IDeviceManager<MediaDevice> {
                     }
                 }
 
-                if (current_attemps.size() > 0) {
+                if (!current_attemps.isEmpty()) {
                     Log.d(TAG, "some in-call devices where already pending, we are then connecting the wired headset");
                     solver.resolve(audioDeviceManagerProxy.connect(finalHeadset, LastConnectionStateType.SYSTEM));
                 } else {

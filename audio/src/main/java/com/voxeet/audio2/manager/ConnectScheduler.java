@@ -32,6 +32,7 @@ public class ConnectScheduler {
     public void pushConnect(@NonNull MediaDevice mediaDevice,
                             @NonNull LastConnectionStateType lastConnectionStateType,
                             @NonNull Solver<Boolean> solver) {
+        Log.d(TAG, "pushConnect for " + mediaDevice.id());
         cancelAwaitingConnect();
         checkDisconnectPrevious(mediaDevice);
         mediaDevices.add(new IOHolder(true, mediaDevice, lastConnectionStateType, solver));
@@ -42,6 +43,7 @@ public class ConnectScheduler {
     public void pushDisconnect(@NonNull MediaDevice mediaDevice,
                                @NonNull LastConnectionStateType lastConnectionStateType,
                                @NonNull Solver<Boolean> solver) {
+        Log.d(TAG, "pushDisconnect for " + mediaDevice.id());
         checkDisconnectPrevious(mediaDevice);
         mediaDevices.add(new IOHolder(false, mediaDevice, lastConnectionStateType, solver));
 
@@ -56,7 +58,7 @@ public class ConnectScheduler {
     }
 
     private void tryIO() {
-        if (!locked && mediaDevices.size() > 0) {
+        if (!locked && !mediaDevices.isEmpty()) {
             locked = true;
             IOHolder holder = mediaDevices.get(0);
             mediaDevices.remove(0);
@@ -128,6 +130,7 @@ public class ConnectScheduler {
         while (index < mediaDevices.size()) {
             IOHolder holder = mediaDevices.get(index);
             if (holder.connect && null != holder.solver) {
+                Log.d(TAG, "cancelAwaitingConnect for " + holder.mediaDevice.id());
                 Promise.reject(holder.solver, new CancellationException("canceled"));
                 mediaDevices.remove(index);
             } else {

@@ -9,6 +9,7 @@ import com.voxeet.audio.focus.AudioFocusManager;
 import com.voxeet.audio.focus.AudioFocusManagerAsync;
 import com.voxeet.audio.utils.Constants;
 import com.voxeet.audio.utils.Invoke;
+import com.voxeet.audio.utils.Log;
 import com.voxeet.promise.Promise;
 import com.voxeet.promise.solve.ThenPromise;
 
@@ -41,7 +42,10 @@ public abstract class AbstractMode {
 
     public Promise<Boolean> abandonAudioFocus() {
         return new Promise<>(solver -> AudioFocusManagerAsync.setMode(manager, AudioManager.MODE_NORMAL, "AbstractMode")
-                .then((ThenPromise<Boolean, Integer>) aBoolean -> audioFocusManger.abandonAudioFocus(manager))
+                .then((ThenPromise<Boolean, Integer>) aBoolean -> {
+                    Log.d(this.getClass().getName(), "abandonAudioFocus");
+                    return audioFocusManger.abandonAudioFocus(manager);
+                })
                 .then(integer -> {
                     forceVolumeControlStream(abandonFocus);
                     solver.resolve(true);

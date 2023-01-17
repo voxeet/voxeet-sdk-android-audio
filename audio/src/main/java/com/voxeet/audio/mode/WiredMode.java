@@ -67,6 +67,7 @@ public class WiredMode extends AbstractMode {
                 Log.d("WiredMode", "not a samsung device, we need to force to media only");
 
                 int finalRequestFocus = requestFocus;
+                Log.d("WiredMode", "requestAudioFocus requestFocus " + requestFocus);
                 mediaFocusManager.requestAudioFocus(manager, requestFocus).then(integer -> {
                     forceVolumeControlStream(finalRequestFocus);
                     solver.resolve(true);
@@ -75,6 +76,7 @@ public class WiredMode extends AbstractMode {
             }
             Log.d("WiredMode", "samsung, requesting audio focus and solving");
 
+            Log.d("WiredMode", "requestAudioFocus requestFocus " + requestFocus);
             audioFocusManger.requestAudioFocus(manager, requestFocus).then(integer -> {
                 solver.resolve(true);
             }).error(solver::reject);

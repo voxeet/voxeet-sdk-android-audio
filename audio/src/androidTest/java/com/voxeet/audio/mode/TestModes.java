@@ -23,13 +23,13 @@ public class TestModes extends TestWithAsyncRun {
     @Test
     public void testSpeakerValid() {
         List<MediaDevice> devices = runWith(audioStackManager.enumerateDevices(DeviceType.EXTERNAL_SPEAKER));
-        Assert.assertFalse(0 == devices.size());
+        Assert.assertNotEquals(0, devices.size());
     }
 
     @Test
     public void testNormalValid() {
         List<MediaDevice> devices = runWith(audioStackManager.enumerateDevices(DeviceType.NORMAL_MEDIA));
-        Assert.assertFalse(0 == devices.size());
+        Assert.assertNotEquals(0, devices.size());
     }
 
     @Test
@@ -37,9 +37,9 @@ public class TestModes extends TestWithAsyncRun {
         List<MediaDevice> devices = runWith(audioStackManager.enumerateDevices(DeviceType.EXTERNAL_SPEAKER));
         boolean connected = audioStackManager.isWiredConnected();
         if (connected) {
-            Assert.assertTrue(1 == devices.size());
+            Assert.assertEquals(1, devices.size());
         } else {
-            Assert.assertFalse(0 == devices.size());
+            Assert.assertNotEquals(0, devices.size());
         }
     }
 }

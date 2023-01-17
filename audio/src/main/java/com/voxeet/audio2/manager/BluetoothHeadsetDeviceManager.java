@@ -188,6 +188,14 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
                 break;
             case SCO_AUDIO_DISCONNECTED:
                 sco_connected = false;
+                if (set.isEmpty()) {
+                    if (active != null && device == null) {
+                        Log.d(TAG, "SCO AUDIO DISCONNECTED ... disconnecting device " + active);
+                        audioDeviceManagerProxy.disconnect(active, LastConnectionStateType.SYSTEM)
+                                .then((ThenVoid<Boolean>) done -> Log.d(TAG, "disconnect done for this device"))
+                                .error(Throwable::printStackTrace);
+                    }
+                }
                 for (Map.Entry<String, BluetoothDeviceConnectionWrapper> entry : set) {
                     Log.d(TAG, "having awaiting sco off... resolving");
                     if (entry.getValue().connect) {
@@ -215,9 +223,11 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
                     break;
                 case DEVICE_CONNECTED:
                     wrapper.setPlatformConnectionState(ConnectionState.CONNECTED);
+                    connectivityUpdate.apply(devices());
                     break;
                 case DEVICE_DISCONNECTED:
                     wrapper.setPlatformConnectionState(ConnectionState.DISCONNECTED);
+                    connectivityUpdate.apply(devices());
                     if (null != device) {
                         audioDeviceManagerProxy.current()
                                 .then((ThenPromise<MediaDevice, Boolean>) mediaDevice -> {
@@ -235,8 +245,6 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
                 default:
             }
         }
-
-        connectivityUpdate.apply(devices());
     }
 
     private List<BluetoothDevice> devices() {
@@ -256,9 +264,11 @@ public class BluetoothHeadsetDeviceManager implements IDeviceManager<BluetoothDe
         for (android.bluetooth.BluetoothDevice device : devices) {
             BluetoothDevice in_list = matching(list, device);
             if (null != in_list) {
+                Log.d(TAG, "requestDevices updating device " + in_list + " with system BluetoothDevice " + device);
                 in_list.update(device);
             } else {
                 hasNew = true;
+                Log.d(TAG, "requestDevices crate new device for BluetoothDevice " + device);
                 in_list = new BluetoothDevice(systemAudioManager.audioManager(),
                         connectionState, DeviceType.BLUETOOTH,
                         this,

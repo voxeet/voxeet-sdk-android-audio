@@ -69,9 +69,7 @@ public class BluetoothHelper {
                                                           @NonNull Method getActiveDevice) {
         try {
             return (BluetoothDevice) getActiveDevice.invoke(headset);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         } catch (SecurityException exception) {
             Log.e(TAG, BluetoothHeadsetDeviceManager.BLUETOOTH_CONNECT_EXCEPTION, exception);
@@ -84,9 +82,7 @@ public class BluetoothHelper {
                                                   @NonNull BluetoothDevice device) {
         try {
             return (boolean) setActiveDevice.invoke(headset, device);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         } catch (SecurityException exception) {
             Log.e(TAG, BluetoothHeadsetDeviceManager.BLUETOOTH_CONNECT_EXCEPTION, exception);

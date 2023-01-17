@@ -57,10 +57,10 @@ public class AudioFocusRequest26 implements AudioFocusRequest {
                     AudioManager.MODE_IN_COMMUNICATION :
                     AudioManager.MODE_NORMAL; //MODE_IN_CALL)
             AudioFocusManagerAsync.setMode(manager, new_mode, "AudioFocusRequest").then(aBoolean -> {
-                Log.d("AudioFocusRequest", "requestAudioFocus");
-                manager.requestAudioFocus(null,
+                int result = manager.requestAudioFocus(null,
                         audioFocusVolumeType, //AudioManager.STREAM_VOICE_CALL,
                         AudioManager.AUDIOFOCUS_GAIN);
+                Log.d("AudioFocusRequest", "requestAudioFocus " + audioFocusVolumeType + " result " + result);
 
                 solver.resolve(manager.requestAudioFocus(focusRequestBuilt));
             }).error(solver::reject);
