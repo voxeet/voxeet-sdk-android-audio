@@ -26,7 +26,7 @@ public class ConnectScheduler {
     private List<Solver<ConnectScheduler>> waitFors = new CopyOnWriteArrayList<>();
 
     public ConnectScheduler() {
-        connectionWrapper = MediaDeviceConnectionWrapper.unique();
+        connectionWrapper = new MediaDeviceConnectionWrapper();
     }
 
     public void pushConnect(@NonNull MediaDevice mediaDevice,
