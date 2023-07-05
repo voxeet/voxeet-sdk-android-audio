@@ -8,17 +8,8 @@ import com.voxeet.audio2.devices.description.LastConnectionStateType;
 import com.voxeet.promise.Promise;
 
 public class MediaDeviceConnectionWrapper {
-    private static boolean called = false;
 
-    private MediaDeviceConnectionWrapper() {
-
-    }
-
-    @NonNull
-    public static MediaDeviceConnectionWrapper unique() {
-        if (called) throw new IllegalStateException("Only one accepted");
-        called = true;
-        return new MediaDeviceConnectionWrapper();
+    public MediaDeviceConnectionWrapper() {
     }
 
     @NonNull
